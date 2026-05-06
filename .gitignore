@@ -1,0 +1,24 @@
+# Build outputs
+SMTAlert/bin/
+SMTAlert/obj/
+*.user
+*.suo
+*.cache
+*.vs/
+
+# IDE
+.vs/
+.idea/
+.vscode/
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Publish output
+publish/
+
+# Claude
+CLAUDE.md
+.claude/

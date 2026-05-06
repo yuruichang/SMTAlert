@@ -1,0 +1,184 @@
+<Window x:Class="SMTAlert.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        WindowStyle="None"
+        ResizeMode="CanResizeWithGrip"
+        Topmost="True"
+        MinWidth="400" MinHeight="250"
+        Title="{DynamicResource App_Title}" Width="500" Height="480"
+        AllowsTransparency="True"
+        Background="#F0222222">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Title Bar -->
+        <Grid Grid.Row="0" Background="#FF1A1A1A" MouseLeftButtonDown="TitleBar_MouseDown">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="{DynamicResource App_Title}" Foreground="#FF777777"
+                       VerticalAlignment="Center" Margin="6,0,0,0" FontSize="10" />
+            <Button Grid.Column="1" Content="⚙" Foreground="#FF888888" Background="Transparent"
+                    BorderThickness="0" Width="20" Height="20" Click="Settings_Click"
+                    ToolTip="{DynamicResource Menu_Settings}" FontSize="12" />
+            <Button Grid.Column="2" Content="−" Foreground="#FF888888" Background="Transparent"
+                    BorderThickness="0" Width="20" Height="20" Click="Minimize_Click" FontSize="12" />
+            <Button Grid.Column="3" Content="✕" Foreground="#FF888888" Background="Transparent"
+                    BorderThickness="0" Width="20" Height="20" Click="Close_Click" FontSize="10" />
+        </Grid>
+
+        <!-- Content Bar -->
+        <Border Grid.Row="1" Background="#FF1E1E1E">
+            <Grid Margin="6,2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Character selector -->
+                <ComboBox x:Name="CharCombo" Grid.Column="0" Width="130"
+                          SelectionChanged="CharCombo_SelectionChanged"
+                          Background="#FFE8E8E8" Foreground="#FF111111" BorderThickness="0"
+                          FontSize="11" />
+
+                <Button Grid.Column="1" Content="+" Foreground="#FF888888" Background="Transparent"
+                        BorderThickness="0" Width="18" Height="18" Click="AddChar_Click"
+                        ToolTip="{DynamicResource Btn_AddChar}" FontSize="12" />
+                <Button Grid.Column="2" Content="−" Foreground="#FF888888" Background="Transparent"
+                        BorderThickness="0" Width="18" Height="18" Click="RemoveChar_Click"
+                        ToolTip="{DynamicResource Btn_RemoveChar}" FontSize="12" />
+
+                <!-- Character info (no width constraints, text wraps naturally) -->
+                <StackPanel Grid.Column="3" Orientation="Horizontal" Margin="6,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="{DynamicResource Char_Location}" Foreground="#FF888888"
+                               FontSize="10" VerticalAlignment="Center" />
+                    <TextBlock Text=" " Foreground="#FF888888" FontSize="10" />
+                    <TextBlock x:Name="CharLocationLabel" Text="---" Foreground="#FFDDDDDD"
+                               FontSize="10" VerticalAlignment="Center" />
+                    <TextBlock Text="  " Foreground="#FF888888" FontSize="10" />
+                    <TextBlock Text="{DynamicResource Char_Region}" Foreground="#FF888888"
+                               FontSize="10" VerticalAlignment="Center" />
+                    <TextBlock Text=" " Foreground="#FF888888" FontSize="10" />
+                    <TextBlock x:Name="CharRegionLabel" Text="---" Foreground="#FFDDDDDD"
+                               FontSize="10" VerticalAlignment="Center" />
+                </StackPanel>
+
+                <!-- Alert range -->
+                <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0,4,0">
+                    <TextBlock Text="{DynamicResource Char_Range}" Foreground="#FF888888"
+                               FontSize="10" VerticalAlignment="Center" Margin="0,0,2,0" />
+                    <TextBlock x:Name="RangeValueLabel" Text="5" Foreground="#FFDDDDDD"
+                               FontSize="10" VerticalAlignment="Center" MinWidth="14" />
+                </StackPanel>
+                <Slider x:Name="RangeSlider" Grid.Column="5" Width="55" Minimum="1" Maximum="15" Value="5"
+                        ValueChanged="RangeSlider_ValueChanged" VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+
+        <!-- Intel header -->
+        <Border Grid.Row="2" Background="#FF1E1E1E" BorderBrush="#FF333333" BorderThickness="0,1,0,0">
+            <Grid Margin="6,2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="2,0,0,0">
+                    <TextBlock Text="⚠" Foreground="#FFCC4444" FontSize="10" VerticalAlignment="Center" />
+                    <TextBlock Text="{DynamicResource Intel_Title}" Foreground="#FF888888"
+                               VerticalAlignment="Center" Margin="4,0,0,0" FontSize="10" />
+                </StackPanel>
+                <Button Grid.Column="1" Content="{DynamicResource Btn_ClearIntel}" Foreground="#FF888888"
+                        Background="#FF2D2D2D" BorderThickness="0" FontSize="10"
+                        Click="ClearIntel_Click" Width="Auto" Padding="6,1" />
+            </Grid>
+        </Border>
+
+        <!-- Intel List -->
+        <ListView x:Name="IntelList" Grid.Row="3" Background="Transparent"
+                  BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Border Padding="3,2" Margin="2,1" Background="#FF1E1E1E"
+                            CornerRadius="2" HorizontalAlignment="Stretch">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <!-- Row 1: [Channel] Time -->
+                            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                                <TextBlock Foreground="#FF44AACC" FontSize="10"
+                                           VerticalAlignment="Center" Margin="0,0,6,0">
+                                    <Run Text="[" /><Run Text="{Binding Data.IntelChannel, FallbackValue=''}" /><Run Text="]" />
+                                </TextBlock>
+                                <TextBlock Text="{Binding IntelTime, StringFormat='{}{0:HH:mm:ss}'}"
+                                           Foreground="#FFAA8844" FontSize="10"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+
+                            <!-- Row 2: System Chips (wrapping) -->
+                            <ItemsControl Grid.Row="1" ItemsSource="{Binding SystemItems}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Margin="1" Padding="3,1" CornerRadius="2">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="#FF333333" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsInRange}" Value="True">
+                                                            <Setter Property="Background" Value="#FFBF360C" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding IsClear}" Value="True">
+                                                            <Setter Property="Background" Value="#FF2E7D32" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock Text="{Binding Name}" FontSize="10"
+                                                       Foreground="#FFE8E8E8" FontWeight="Bold" />
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- Row 3: Intel Content -->
+                            <TextBlock Grid.Row="2"
+                                       Text="{Binding IntelString}"
+                                       Foreground="#FFAAAAAA" FontSize="10"
+                                       TextWrapping="Wrap"
+                                       Margin="0,1,0,0" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+</Window>
