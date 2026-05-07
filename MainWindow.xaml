@@ -1,0 +1,34 @@
+<Window x:Class="SMTAlert.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SMT Alert" Height="260" Width="350"
+        WindowStartupLocation="CenterScreen" Background="#FF232223"
+        Closing="Window_Closing" StateChanged="Window_StateChanged">
+    <Grid Background="#FF232223">
+        <StackPanel Orientation="Vertical" Margin="15" VerticalAlignment="Center">
+            <TextBlock Text="{DynamicResource App_Title}" FontSize="18" FontWeight="Bold"
+                       Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,10" />
+
+            <TextBlock x:Name="StatusText" Text="{DynamicResource Main_NoChar}"
+                       Foreground="White" TextWrapping="Wrap" HorizontalAlignment="Center"
+                       Margin="0,0,0,10" />
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button x:Name="BtnOverlay" Content="{DynamicResource Main_Menu_Overlay}"
+                        Click="BtnOverlay_Click" Width="150" Height="30" Margin="5" />
+                <Button x:Name="BtnZKB" Content="{DynamicResource Main_Menu_ZKB}"
+                        Click="BtnZKB_Click" Width="150" Height="30" Margin="5" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,0">
+                <Button x:Name="BtnAlertChannel" Content="{DynamicResource Main_Menu_AlertChannel}"
+                        Click="BtnAlertChannel_Click" Width="150" Height="30" Margin="5" />
+                <Button x:Name="BtnAddChar" Content="{DynamicResource Main_Menu_AddChar}"
+                        Click="BtnAddChar_Click" Width="150" Height="30" Margin="5" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,0">
+                <Button x:Name="BtnSettings" Content="{DynamicResource Main_Menu_Settings}"
+                        Click="BtnSettings_Click" Width="150" Height="30" Margin="5" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>
