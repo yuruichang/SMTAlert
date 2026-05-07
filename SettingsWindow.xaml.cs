@@ -64,7 +64,6 @@ namespace SMTAlert
             ZkbMaxKillsTxt.Text = cfg.ZkbMaxKills.ToString();
             ZkbExpireTxt.Text = cfg.ZkbExpireMinutes.ToString();
             ZkbFilterRegionChk.IsChecked = cfg.ZkbFilterByWarningRegion;
-            ZkbCustomSystemsTxt.Text = cfg.ZkbCustomSystems;
 
             _initializing = false;
         }
@@ -224,13 +223,6 @@ namespace SMTAlert
         {
             if (_initializing) return;
             App.Config.ZkbFilterByWarningRegion = ZkbFilterRegionChk.IsChecked == true;
-            App.Config.Save();
-        }
-
-        private void ZkbCustomSystems_Changed(object sender, TextChangedEventArgs e)
-        {
-            if (_initializing) return;
-            App.Config.ZkbCustomSystems = ZkbCustomSystemsTxt.Text;
             App.Config.Save();
         }
 

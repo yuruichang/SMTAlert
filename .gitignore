@@ -1,5 +1,7 @@
 bin/
 obj/
+.vs/
 *.user
 *.suo
-.vs/
+*.cache
+*.sln.DotSettings.user
