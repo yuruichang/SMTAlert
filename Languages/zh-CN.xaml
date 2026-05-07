@@ -1,0 +1,79 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:s="clr-namespace:System;assembly=mscorlib">
+
+    <!-- App -->
+    <s:String x:Key="App_Title">SMT 预警</s:String>
+    <s:String x:Key="App_TrayShow">显示</s:String>
+    <s:String x:Key="App_TrayExit">退出</s:String>
+
+    <!-- Main Window -->
+    <s:String x:Key="Main_Menu_Overlay">打开预警雷达悬浮窗</s:String>
+    <s:String x:Key="Main_Menu_ZKB">打开 ZKB 击杀推送</s:String>
+    <s:String x:Key="Main_Menu_Settings">设置</s:String>
+    <s:String x:Key="Main_Menu_AddChar">添加角色</s:String>
+    <s:String x:Key="Main_Menu_AlertChannel">预警频道消息</s:String>
+    <s:String x:Key="AlertCh_Title">预警频道监控</s:String>
+    <s:String x:Key="AlertCh_Channel">频道:</s:String>
+    <s:String x:Key="AlertCh_ClearKeywords">清除:</s:String>
+    <s:String x:Key="Main_CharList">角色列表</s:String>
+    <s:String x:Key="Main_NoChar">尚未添加角色。点击"添加角色"通过 EVE SSO 登录。</s:String>
+    <s:String x:Key="Main_CharDelete">删除角色</s:String>
+    <s:String x:Key="Main_CharDeleteConfirm">确定要移除此角色吗？</s:String>
+
+    <!-- Logon Window -->
+    <s:String x:Key="Logon_Title">SMTAlert - EVE SSO 登录</s:String>
+    <s:String x:Key="Logon_Line1">SMTAlert 正在打开浏览器进行 EVE SSO 登录。</s:String>
+    <s:String x:Key="Logon_Line2">授权完成后请关闭此窗口。</s:String>
+
+    <!-- Overlay Window -->
+    <s:String x:Key="Overlay_Title">SMTAlert 预警雷达</s:String>
+    <s:String x:Key="Overlay_NoChar">暂无活动角色</s:String>
+    <s:String x:Key="Overlay_AlertLabel">预警</s:String>
+    <s:String x:Key="Overlay_TipDrag">按住拖动悬浮窗</s:String>
+    <s:String x:Key="Overlay_TipToggle">切换雷达显示模式</s:String>
+    <s:String x:Key="Overlay_TipClose">关闭悬浮窗</s:String>
+
+    <!-- ZKB Monitor -->
+    <s:String x:Key="ZKB_Title">ZKB 击杀推送</s:String>
+    <s:String x:Key="ZKB_Column_Time">时间</s:String>
+    <s:String x:Key="ZKB_Column_System">星系</s:String>
+    <s:String x:Key="ZKB_Column_Alliance">联盟</s:String>
+    <s:String x:Key="ZKB_Column_ShipType">舰船类型</s:String>
+    <s:String x:Key="ZKB_CtxShowSys">查看星系详情</s:String>
+    <s:String x:Key="ZKB_CtxOpen">在 ZKB 中打开</s:String>
+
+    <!-- Settings Window -->
+    <s:String x:Key="Settings_Title">SMTAlert 设置</s:String>
+    <s:String x:Key="Settings_Tab_General">常规</s:String>
+    <s:String x:Key="Settings_Tab_Overlay">悬浮窗</s:String>
+    <s:String x:Key="Settings_Tab_ZKB">ZKB 窗口</s:String>
+    <s:String x:Key="Settings_Tab_Characters">角色</s:String>
+    <s:String x:Key="Settings_General_Lang">语言</s:String>
+    <s:String x:Key="Settings_General_AlwaysOnTop">始终置顶</s:String>
+    <s:String x:Key="Settings_General_MinimizeToTray">最小化到系统托盘</s:String>
+    <s:String x:Key="Settings_General_LogFolder">EVE 日志目录</s:String>
+    <s:String x:Key="Settings_Alert_Channel">预警频道名称</s:String>
+    <s:String x:Key="Settings_Alert_ClearKeywords">清除预警关键词</s:String>
+    <s:String x:Key="Settings_Alert_ClearKeywordsTip">多个关键词用逗号隔开，例如：安全, 清场, 蓝星</s:String>
+    <s:String x:Key="Settings_Ovl_BgOpacity">背景不透明度</s:String>
+    <s:String x:Key="Settings_Ovl_ContentOpacity">内容不透明度</s:String>
+    <s:String x:Key="Settings_Ovl_GathererMode">采集者模式</s:String>
+    <s:String x:Key="Settings_Ovl_ShowFullRegion">显示完整星域（猎人模式）</s:String>
+    <s:String x:Key="Settings_Ovl_ShowSysNames">显示星系名称</s:String>
+    <s:String x:Key="Settings_ZKB_BgOpacity">背景不透明度</s:String>
+    <s:String x:Key="Settings_ZKB_ContentOpacity">内容不透明度</s:String>
+    <s:String x:Key="Settings_ZKB_MaxKills">最大显示击杀数</s:String>
+    <s:String x:Key="Settings_ZKB_ExpireMin">击杀过期时间（分钟）</s:String>
+    <s:String x:Key="Settings_ZKB_FilterRegion">按预警区域过滤</s:String>
+
+    <!-- Character Alert Settings -->
+    <s:String x:Key="Char_AlertRange">预警范围（跳跃数）</s:String>
+    <s:String x:Key="Char_AlertEnabled">启用预警</s:String>
+    <s:String x:Key="Char_Location">当前位置</s:String>
+    <s:String x:Key="Char_Online">在线</s:String>
+    <s:String x:Key="Char_SetActive">设为监听目标</s:String>
+    <s:String x:Key="Char_ActiveTag">[当前]</s:String>
+    <s:String x:Key="Char_Back">← 返回</s:String>
+    <s:String x:Key="Char_Jumps">跳</s:String>
+</ResourceDictionary>

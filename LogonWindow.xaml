@@ -1,0 +1,14 @@
+<Window x:Class="SMTAlert.LogonWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{DynamicResource Logon_Title}" Height="120" Width="270"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="#FF232223"
+        Closed="Window_Closed">
+    <Grid Background="#FF232223">
+        <StackPanel Background="#FF232223">
+            <Label Height="23" Content="{DynamicResource Logon_Line1}" Foreground="White" />
+            <Label Height="23" Content="{DynamicResource Logon_Line2}" Foreground="White" />
+        </StackPanel>
+    </Grid>
+</Window>
