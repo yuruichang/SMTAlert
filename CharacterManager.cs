@@ -296,6 +296,9 @@ namespace SMTAlert
                             if (intel.IntelTime < oldCutoff) continue;
                             bool isFresh = intel.IntelTime >= freshCutoff;
 
+                            // Track first in-range system for reporter movement (only non-clear intel)
+                            string reporterSystem = null;
+
                             foreach (var sysName in intel.Systems)
                             {
                                 if (!systemsInRange.Contains(sysName))
@@ -313,6 +316,9 @@ namespace SMTAlert
                                 }
                                 else
                                 {
+                                    if (reporterSystem == null)
+                                        reporterSystem = sysName;
+
                                     if (isFresh)
                                     {
                                         // Fresh hostile: active warning
@@ -331,10 +337,11 @@ namespace SMTAlert
                                         }
                                     }
                                 }
-
-                                // Reporter movement tracking → stale previous system
-                                TrackReporterMovement(intel, sysName, stale);
                             }
+
+                            // Reporter movement tracking — one system per intel to avoid false-positive spread
+                            if (reporterSystem != null)
+                                TrackReporterMovement(intel, reporterSystem, stale);
                         }
 
                         // Stale: systems first warned > 5 min ago, not actively warned, not cleared
