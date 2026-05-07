@@ -28,6 +28,7 @@ namespace SMTAlert
 
         // --- State ---
         private Dictionary<string, OverlaySystemEntry> _systems = new();
+        private List<List<string>> _hierarchyTiers = new();
         private List<Line> _jumpLines = new();
         private int _overlayDepth = 6; // 1 + alertRange
         private bool _gathererMode = false;
@@ -214,6 +215,7 @@ namespace SMTAlert
                     overlay_Canvas.Children.Remove(kvp.Value.WarningEllipse);
             }
             _systems.Clear();
+            _hierarchyTiers.Clear();
         }
 
         private void CollectSystems()
@@ -231,40 +233,64 @@ namespace SMTAlert
 
             if (_gathererMode || !_hunterModeShowFullRegion)
             {
-                // BFS collection within overlayDepth jumps
-                var queue = new Queue<(string, int)>();
-                queue.Enqueue((c.Location, 0));
-                visited.Add(c.Location);
+                // Pyramid hierarchy: current system at tier 0 (top), each subsequent tier = +1 jump
+                _hierarchyTiers = new List<List<string>>();
 
-                while (queue.Count > 0)
+                // Remove old canvas elements before rebuilding
+                foreach (var key in _systems.Keys.ToList())
                 {
-                    var (name, depth) = queue.Dequeue();
-                    var sys = EveManager.Instance.GetEveSystem(name);
-                    if (sys == null) continue;
+                    var oldEntry = _systems[key];
+                    if (oldEntry.Shape != null && overlay_Canvas.Children.Contains(oldEntry.Shape))
+                        overlay_Canvas.Children.Remove(oldEntry.Shape);
+                    if (oldEntry.NameLabel != null && overlay_Canvas.Children.Contains(oldEntry.NameLabel))
+                        overlay_Canvas.Children.Remove(oldEntry.NameLabel);
+                    if (oldEntry.WarningEllipse != null && overlay_Canvas.Children.Contains(oldEntry.WarningEllipse))
+                        overlay_Canvas.Children.Remove(oldEntry.WarningEllipse);
+                }
+                _systems.Clear();
 
-                    // Get layout coords
-                    var region = EveManager.Instance.GetRegion(sys.Region);
-                    if (region != null && region.MapSystems.ContainsKey(name))
-                    {
-                        var layout = region.MapSystems[name].Layout;
-                        UpdateExtends(layout);
-                        if (!_systems.ContainsKey(name))
-                            _systems[name] = new OverlaySystemEntry { EveSystem = sys, LayoutCoord = layout };
-                        else
-                            _systems[name].EveSystem = sys;
-                    }
+                // Tier 0: current system (top of pyramid)
+                _hierarchyTiers.Add(new List<string> { c.Location });
+                visited.Add(c.Location);
+                _systems[c.Location] = new OverlaySystemEntry
+                {
+                    EveSystem = currentSys,
+                    LayoutCoord = Vector2.Zero,
+                    Tier = 0,
+                    TierIndex = 0
+                };
 
-                    if (depth < _overlayDepth)
+                // Build subsequent tiers by BFS — systems appear at their shallowest depth
+                for (int depth = 1; depth < _overlayDepth; depth++)
+                {
+                    var currentTier = new List<string>();
+                    foreach (var prevSysName in _hierarchyTiers[depth - 1])
                     {
-                        foreach (var jump in sys.Jumps)
+                        var prevSys = EveManager.Instance.GetEveSystem(prevSysName);
+                        if (prevSys == null) continue;
+
+                        foreach (var jump in prevSys.Jumps)
                         {
                             if (!visited.Contains(jump))
                             {
                                 visited.Add(jump);
-                                queue.Enqueue((jump, depth + 1));
+                                currentTier.Add(jump);
+
+                                var jumpSys = EveManager.Instance.GetEveSystem(jump);
+                                if (jumpSys != null)
+                                {
+                                    _systems[jump] = new OverlaySystemEntry
+                                    {
+                                        EveSystem = jumpSys,
+                                        LayoutCoord = Vector2.Zero,
+                                        Tier = depth,
+                                        TierIndex = currentTier.Count - 1
+                                    };
+                                }
                             }
                         }
                     }
+                    _hierarchyTiers.Add(currentTier);
                 }
             }
             else
@@ -287,22 +313,25 @@ namespace SMTAlert
                 }
             }
 
-            // Remove systems no longer in view
-            var toRemove = _systems.Keys.Where(k => !visited.Contains(k)).ToList();
-            foreach (var key in toRemove)
+            if (!_gathererMode && _hunterModeShowFullRegion)
             {
-                var entry = _systems[key];
-                if (entry.Shape != null && overlay_Canvas.Children.Contains(entry.Shape))
-                    overlay_Canvas.Children.Remove(entry.Shape);
-                if (entry.NameLabel != null && overlay_Canvas.Children.Contains(entry.NameLabel))
-                    overlay_Canvas.Children.Remove(entry.NameLabel);
-                if (entry.WarningEllipse != null && overlay_Canvas.Children.Contains(entry.WarningEllipse))
-                    overlay_Canvas.Children.Remove(entry.WarningEllipse);
-                _systems.Remove(key);
-            }
+                // Remove systems no longer in view (hunter mode only)
+                var toRemove = _systems.Keys.Where(k => !visited.Contains(k)).ToList();
+                foreach (var key in toRemove)
+                {
+                    var entry = _systems[key];
+                    if (entry.Shape != null && overlay_Canvas.Children.Contains(entry.Shape))
+                        overlay_Canvas.Children.Remove(entry.Shape);
+                    if (entry.NameLabel != null && overlay_Canvas.Children.Contains(entry.NameLabel))
+                        overlay_Canvas.Children.Remove(entry.NameLabel);
+                    if (entry.WarningEllipse != null && overlay_Canvas.Children.Contains(entry.WarningEllipse))
+                        overlay_Canvas.Children.Remove(entry.WarningEllipse);
+                    _systems.Remove(key);
+                }
 
-            // Compute scaling
-            ComputeScale();
+                // Compute geographic scaling (hunter mode only)
+                ComputeScale();
+            }
         }
 
         private void UpdateExtends(Vector2 coord)
@@ -419,6 +448,46 @@ namespace SMTAlert
                 overlay_Canvas.Children.Remove(line);
             _jumpLines.Clear();
 
+            // Pre-compute canvas positions based on mode
+            if (_gathererMode || !_hunterModeShowFullRegion)
+            {
+                // Pyramid layout: tier 0 at top, expanding downward like a pyramid
+                int totalTiers = _hierarchyTiers.Count;
+                if (totalTiers > 0)
+                {
+                    float rowHeight = _canvasHeight / totalTiers;
+                    for (int t = 0; t < _hierarchyTiers.Count; t++)
+                    {
+                        var tierSystems = _hierarchyTiers[t];
+                        int sysCount = tierSystems.Count;
+                        if (sysCount == 0) continue;
+                        float colWidth = _canvasWidth / sysCount;
+                        for (int si = 0; si < tierSystems.Count; si++)
+                        {
+                            string sysName = tierSystems[si];
+                            if (!_systems.TryGetValue(sysName, out var sysEntry)) continue;
+
+                            float centerX = colWidth / 2f + colWidth * si;
+                            float centerY = rowHeight / 2f + rowHeight * t;
+
+                            // Apply zoom/pan relative to canvas center
+                            float x = _canvasWidth / 2f + _userPanX + (centerX - _canvasWidth / 2f) * _userScale;
+                            float y = _canvasHeight / 2f + _userPanY + (centerY - _canvasHeight / 2f) * _userScale;
+
+                            sysEntry.CanvasCoord = new Vector2(x, y);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // Hunter mode: geographic layout
+                foreach (var kvp in _systems)
+                {
+                    kvp.Value.CanvasCoord = LayoutToCanvas(kvp.Value.LayoutCoord);
+                }
+            }
+
             // Track drawn connections
             var drawnConnections = new HashSet<string>();
 
@@ -428,7 +497,7 @@ namespace SMTAlert
                 var sys = entry.EveSystem ?? EveManager.Instance.GetEveSystem(kvp.Key);
                 if (sys == null) continue;
 
-                var canvasPos = LayoutToCanvas(entry.LayoutCoord);
+                var canvasPos = entry.CanvasCoord;
                 float sysSize = GetSystemSize(kvp.Key);
                 bool isCurrent = kvp.Key == c?.Location;
                 bool isWarning = warningSet.Contains(kvp.Key);
@@ -537,7 +606,7 @@ namespace SMTAlert
                     drawnConnections.Add(connKey);
 
                     var targetEntry = _systems[jumpName];
-                    var targetPos = LayoutToCanvas(targetEntry.LayoutCoord);
+                    var targetPos = targetEntry.CanvasCoord;
 
                     var line = new Line
                     {
@@ -698,6 +767,8 @@ namespace SMTAlert
         public SMT.EVEData.System EveSystem;
         public Vector2 LayoutCoord;
         public Vector2 CanvasCoord;
+        public int Tier;
+        public int TierIndex;
         public Ellipse Shape;
         public Ellipse WarningEllipse;
         public TextBlock NameLabel;
