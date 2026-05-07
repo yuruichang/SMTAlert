@@ -24,8 +24,14 @@ namespace SMTAlert
             App.AppWindow = this;
             Topmost = App.Config.AlwaysOnTop;
 
-            // Window position
-            SourceInitialized += (s, e) => LoadWindowPosition();
+            // Window position + intercept minimize
+            SourceInitialized += (s, e) =>
+            {
+                LoadWindowPosition();
+                var hwnd = new WindowInteropHelper(this).Handle;
+                var source = HwndSource.FromHwnd(hwnd);
+                source.AddHook(WndProcHook);
+            };
 
             // System tray
             InitializeTrayIcon();
@@ -222,7 +228,7 @@ namespace SMTAlert
             if (App.Config.MinimizeToTray && WindowState == WindowState.Minimized)
             {
                 Hide();
-                // Restore owned floating windows — WPF minimizes them when owner is minimized
+                // Restore owned float windows in case they were minimized alongside
                 if (_overlayWindow != null && _overlayWindow.WindowState == WindowState.Minimized)
                     _overlayWindow.WindowState = WindowState.Normal;
                 if (_zkbWindow != null && _zkbWindow.WindowState == WindowState.Minimized)
@@ -230,6 +236,20 @@ namespace SMTAlert
                 if (_alertChannelWindow != null && _alertChannelWindow.WindowState == WindowState.Minimized)
                     _alertChannelWindow.WindowState = WindowState.Normal;
             }
+        }
+
+        private IntPtr WndProcHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            const int WM_SYSCOMMAND = 0x0112;
+            const int SC_MINIMIZE = 0xF020;
+
+            if (msg == WM_SYSCOMMAND && wParam.ToInt64() == SC_MINIMIZE && App.Config.MinimizeToTray)
+            {
+                handled = true;
+                Hide();
+                return IntPtr.Zero;
+            }
+            return IntPtr.Zero;
         }
 
         // --- Window position persistence ---
