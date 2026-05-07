@@ -220,7 +220,16 @@ namespace SMTAlert
         private void Window_StateChanged(object sender, EventArgs e)
         {
             if (App.Config.MinimizeToTray && WindowState == WindowState.Minimized)
+            {
                 Hide();
+                // Restore owned floating windows — WPF minimizes them when owner is minimized
+                if (_overlayWindow != null && _overlayWindow.WindowState == WindowState.Minimized)
+                    _overlayWindow.WindowState = WindowState.Normal;
+                if (_zkbWindow != null && _zkbWindow.WindowState == WindowState.Minimized)
+                    _zkbWindow.WindowState = WindowState.Normal;
+                if (_alertChannelWindow != null && _alertChannelWindow.WindowState == WindowState.Minimized)
+                    _alertChannelWindow.WindowState = WindowState.Normal;
+            }
         }
 
         // --- Window position persistence ---

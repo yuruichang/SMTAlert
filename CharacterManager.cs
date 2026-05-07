@@ -57,6 +57,8 @@ namespace SMTAlert
             "esi-location.read_location.v1",
             "esi-location.read_online.v1",
             "esi-characters.read_standings.v1",
+            "esi-corporations.read_contacts.v1",
+            "esi-alliances.read_contacts.v1",
         };
 
         public CharacterManager()
@@ -489,10 +491,6 @@ namespace SMTAlert
 
             try
             {
-                // Use alliance and corporation contacts (same approach as main SMT)
-                // Character personal standings are typically empty for most players.
-                // Corp/Alliance contacts are what matter for ZKB kill coloring.
-
                 if (c.AllianceID != 0)
                 {
                     int page = 1;
@@ -525,7 +523,6 @@ namespace SMTAlert
                             maxPageCount = esr.MaxPages > 0 ? esr.MaxPages : 1;
                             foreach (var con in esr.Model)
                             {
-                                // Only add if not already set by alliance contacts
                                 if (!c.Standings.ContainsKey(con.ContactId))
                                     c.Standings[con.ContactId] = (float)con.Standing;
                             }
