@@ -332,8 +332,8 @@ namespace SMTAlert
                                     }
                                 }
 
-                                // Character-based clear tracking
-                                TrackReporterMovement(intel, sysName, cleared);
+                                // Reporter movement tracking → stale previous system
+                                TrackReporterMovement(intel, sysName, stale);
                             }
                         }
 
@@ -537,9 +537,9 @@ namespace SMTAlert
 
         /// <summary>
         /// Tracks reporter movement between systems. When all reporters of a system
-        /// have been seen in other systems, the original system is implicitly cleared.
+        /// have been seen in other systems, the original system is marked as stale.
         /// </summary>
-        private void TrackReporterMovement(IntelData intel, string sysName, List<string> cleared)
+        private void TrackReporterMovement(IntelData intel, string sysName, List<string> stale)
         {
             string reporter = ParseReporterName(intel.RawIntelString);
             if (string.IsNullOrEmpty(reporter))
@@ -552,13 +552,13 @@ namespace SMTAlert
                 if (_systemReporters.TryGetValue(prevSystem, out var prevReporters))
                 {
                     prevReporters.Remove(reporter);
-                    // If no reporters remain for the previous system, it's implicitly cleared
+                    // If no reporters remain for the previous system, mark it as stale
                     if (prevReporters.Count == 0)
                     {
                         _systemReporters.Remove(prevSystem);
                         _systemFirstWarned.Remove(prevSystem);
-                        if (!cleared.Contains(prevSystem))
-                            cleared.Add(prevSystem);
+                        if (!stale.Contains(prevSystem))
+                            stale.Add(prevSystem);
                     }
                 }
             }
