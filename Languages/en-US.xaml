@@ -56,6 +56,8 @@
     <s:String x:Key="Settings_Alert_Channel">Alert Channel Name</s:String>
     <s:String x:Key="Settings_Alert_ClearKeywords">Clear Alert Keywords</s:String>
     <s:String x:Key="Settings_Alert_ClearKeywordsTip">Multiple keywords separated by commas, e.g.: clear, safe, green</s:String>
+    <s:String x:Key="Settings_Alert_FreshMin">Alert Fresh Time (min)</s:String>
+    <s:String x:Key="Settings_Alert_StaleMin">Alert Stale Time (min)</s:String>
     <s:String x:Key="Settings_Ovl_BgOpacity">Background Opacity</s:String>
     <s:String x:Key="Settings_Ovl_ContentOpacity">Content Opacity</s:String>
     <s:String x:Key="Settings_Ovl_GathererMode">Defense Mode</s:String>

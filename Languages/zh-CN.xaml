@@ -56,6 +56,8 @@
     <s:String x:Key="Settings_Alert_Channel">预警频道名称</s:String>
     <s:String x:Key="Settings_Alert_ClearKeywords">清除预警关键词</s:String>
     <s:String x:Key="Settings_Alert_ClearKeywordsTip">多个关键词用逗号隔开，例如：安全, 清场, 蓝星</s:String>
+    <s:String x:Key="Settings_Alert_FreshMin">预警活跃时间（分钟）</s:String>
+    <s:String x:Key="Settings_Alert_StaleMin">预警超时时间（分钟）</s:String>
     <s:String x:Key="Settings_Ovl_BgOpacity">背景不透明度</s:String>
     <s:String x:Key="Settings_Ovl_ContentOpacity">内容不透明度</s:String>
     <s:String x:Key="Settings_Ovl_GathererMode">防御模式</s:String>

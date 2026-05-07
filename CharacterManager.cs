@@ -285,8 +285,8 @@ namespace SMTAlert
                         var cleared = new List<string>();
                         var stale = new List<string>();
                         var now = DateTime.UtcNow;
-                        var freshCutoff = now.AddMinutes(-5);
-                        var oldCutoff = now.AddMinutes(-10);
+                        var freshCutoff = now.AddMinutes(-App.Config.AlertFreshMinutes);
+                        var oldCutoff = now.AddMinutes(-App.Config.AlertStaleMinutes);
 
                         // Iterate oldest-first so newer intel overrides older.
                         // FixedQueue inserts at index 0 (newest first), so reverse gives oldest first.

@@ -84,6 +84,14 @@
                         <TextBox x:Name="AlertClearKeywordsTxt" Width="200" TextChanged="AlertClearKeywords_Changed"
                                  ToolTip="{DynamicResource Settings_Alert_ClearKeywordsTip}" />
                     </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,5">
+                        <Label Content="{DynamicResource Settings_Alert_FreshMin}" Width="120" Foreground="White" />
+                        <TextBox x:Name="AlertFreshMinTxt" Width="60" TextChanged="AlertFreshMin_Changed" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,5">
+                        <Label Content="{DynamicResource Settings_Alert_StaleMin}" Width="120" Foreground="White" />
+                        <TextBox x:Name="AlertStaleMinTxt" Width="60" TextChanged="AlertStaleMin_Changed" />
+                    </StackPanel>
                 </StackPanel>
             </TabItem>
 

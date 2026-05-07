@@ -41,6 +41,8 @@ namespace SMTAlert
             MinimizeToTrayChk.IsChecked = cfg.MinimizeToTray;
             AlertChannelTxt.Text = cfg.AlertChannelName;
             AlertClearKeywordsTxt.Text = cfg.AlertClearKeywords;
+            AlertFreshMinTxt.Text = cfg.AlertFreshMinutes.ToString();
+            AlertStaleMinTxt.Text = cfg.AlertStaleMinutes.ToString();
 
             // EVE Log folder
             LogFolderTxt.Text = string.IsNullOrEmpty(cfg.EveLogFolder)
@@ -116,6 +118,26 @@ namespace SMTAlert
             if (_initializing) return;
             App.Config.AlertClearKeywords = AlertClearKeywordsTxt.Text;
             App.Config.Save();
+        }
+
+        private void AlertFreshMin_Changed(object sender, TextChangedEventArgs e)
+        {
+            if (_initializing) return;
+            if (int.TryParse(AlertFreshMinTxt.Text, out int val))
+            {
+                App.Config.AlertFreshMinutes = val;
+                App.Config.Save();
+            }
+        }
+
+        private void AlertStaleMin_Changed(object sender, TextChangedEventArgs e)
+        {
+            if (_initializing) return;
+            if (int.TryParse(AlertStaleMinTxt.Text, out int val))
+            {
+                App.Config.AlertStaleMinutes = val;
+                App.Config.Save();
+            }
         }
 
         // --- Overlay ---

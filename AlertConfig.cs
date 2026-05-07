@@ -140,6 +140,21 @@ namespace SMTAlert
             set { _alertClearKeywords = value ?? ""; OnPropertyChanged(nameof(AlertClearKeywords)); }
         }
 
+        // --- Alert timing ---
+        private int _alertFreshMinutes = 5;
+        public int AlertFreshMinutes
+        {
+            get => _alertFreshMinutes;
+            set { _alertFreshMinutes = Math.Clamp(value, 1, 30); OnPropertyChanged(nameof(AlertFreshMinutes)); }
+        }
+
+        private int _alertStaleMinutes = 10;
+        public int AlertStaleMinutes
+        {
+            get => _alertStaleMinutes;
+            set { _alertStaleMinutes = Math.Clamp(value, 2, 60); OnPropertyChanged(nameof(AlertStaleMinutes)); }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string name) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
