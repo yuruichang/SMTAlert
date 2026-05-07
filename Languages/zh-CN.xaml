@@ -58,8 +58,8 @@
     <s:String x:Key="Settings_Alert_ClearKeywordsTip">多个关键词用逗号隔开，例如：安全, 清场, 蓝星</s:String>
     <s:String x:Key="Settings_Ovl_BgOpacity">背景不透明度</s:String>
     <s:String x:Key="Settings_Ovl_ContentOpacity">内容不透明度</s:String>
-    <s:String x:Key="Settings_Ovl_GathererMode">采集者模式</s:String>
-    <s:String x:Key="Settings_Ovl_ShowFullRegion">显示完整星域（猎人模式）</s:String>
+    <s:String x:Key="Settings_Ovl_GathererMode">防御模式</s:String>
+    <s:String x:Key="Settings_Ovl_ShowFullRegion">显示完整星域</s:String>
     <s:String x:Key="Settings_Ovl_ShowSysNames">显示星系名称</s:String>
     <s:String x:Key="Settings_ZKB_BgOpacity">背景不透明度</s:String>
     <s:String x:Key="Settings_ZKB_ContentOpacity">内容不透明度</s:String>

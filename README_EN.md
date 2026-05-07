@@ -54,10 +54,10 @@ A standalone WPF desktop application extracted from [SMT (Slazanger's Eve Map To
 
 ## Screenshots
 
-![Main Window](images/main_window.png)
-![Alert Radar](images/overlay.png)
-![ZKB Monitor](images/zkb_monitor.png)
-![Settings](images/settings.png)
+![Main Window](Images/main_window.png)
+![Alert Radar](Images/overlay.png)
+![ZKB Monitor](Images/zkb_monitor.png)
+![Settings](Images/settings.png)
 
 ## License
 
