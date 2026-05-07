@@ -66,6 +66,8 @@
     <s:String x:Key="Settings_ZKB_MaxKills">最大显示击杀数</s:String>
     <s:String x:Key="Settings_ZKB_ExpireMin">击杀过期时间（分钟）</s:String>
     <s:String x:Key="Settings_ZKB_FilterRegion">按预警区域过滤</s:String>
+    <s:String x:Key="Settings_ZKB_CustomSystems">监控星域/星系</s:String>
+    <s:String x:Key="Settings_ZKB_CustomSystemsTip">多个名字用逗号隔开，支持中英文，如：The Forge, 宁静之域, Jita</s:String>
 
     <!-- Character Alert Settings -->
     <s:String x:Key="Char_AlertRange">预警范围（跳跃数）</s:String>

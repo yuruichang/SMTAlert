@@ -10,6 +10,7 @@
     <RunAnalyzersDuringBuild>False</RunAnalyzersDuringBuild>
     <RunAnalyzersDuringLiveAnalysis>False</RunAnalyzersDuringLiveAnalysis>
     <Version>1.0</Version>
+    <ApplicationIcon>data\logo.ico</ApplicationIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
@@ -76,15 +77,20 @@
     <None Update="data\Translation.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="data\logo.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <Content Include="Sounds\woop.mp3">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
-  <Target Name="CopyDataFiles" AfterTargets="Build">
+  <Target Name="CopyDataFiles" AfterTargets="Build;Publish">
     <Copy SourceFiles="..\EVEData\data\Systems.dat" DestinationFolder="$(OutputPath)\data" SkipUnchangedFiles="true" />
     <Copy SourceFiles="..\EVEData\data\ShipTypes.dat" DestinationFolder="$(OutputPath)\data" SkipUnchangedFiles="true" />
     <Copy SourceFiles="..\EVEData\data\ShipTypesCN.dat" DestinationFolder="$(OutputPath)\data" SkipUnchangedFiles="true" />
     <Copy SourceFiles="..\EVEData\data\MapLayout.dat" DestinationFolder="$(OutputPath)\data" SkipUnchangedFiles="true" />
     <Copy SourceFiles="..\EVEData\data\Translation.csv" DestinationFolder="$(OutputPath)\data" SkipUnchangedFiles="true" />
     <Copy SourceFiles="..\EVEData\data\JumpRangeCache.dat" DestinationFolder="$(OutputPath)\data" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="..\SMT\Sounds\woop.mp3" DestinationFolder="$(OutputPath)\Sounds" SkipUnchangedFiles="true" />
   </Target>
 </Project>

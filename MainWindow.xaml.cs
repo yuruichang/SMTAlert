@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Drawing;
 using System.Windows;
 using System.Windows.Interop;
 using SMT.EVEData;
@@ -15,6 +16,7 @@ namespace SMTAlert
         private SettingsWindow _settingsWindow;
         private AlertChannelWindow _alertChannelWindow;
         private AlertCharacter _trackedCharacter;
+        private System.Windows.Forms.NotifyIcon _notifyIcon;
 
         public MainWindow()
         {
@@ -25,10 +27,55 @@ namespace SMTAlert
             // Window position
             SourceInitialized += (s, e) => LoadWindowPosition();
 
+            // System tray
+            InitializeTrayIcon();
+
             // Character change updates
             App.CharacterMgr.CharactersChanged += OnCharactersChanged;
             App.Config.PropertyChanged += OnConfigChanged;
             OnCharactersChanged();
+        }
+
+        private void InitializeTrayIcon()
+        {
+            string iconPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "logo.ico");
+            Icon trayIcon;
+            if (System.IO.File.Exists(iconPath))
+                trayIcon = new Icon(iconPath);
+            else
+                trayIcon = SystemIcons.Application;
+
+            var showText = (string)TryFindResource("App_TrayShow") ?? "Show";
+            var exitText = (string)TryFindResource("App_TrayExit") ?? "Exit";
+
+            var contextMenu = new System.Windows.Forms.ContextMenuStrip();
+            contextMenu.Items.Add(showText, null, (s, e) => RestoreFromTray());
+            contextMenu.Items.Add(new System.Windows.Forms.ToolStripSeparator());
+            contextMenu.Items.Add(exitText, null, (s, e) => ExitApplication());
+
+            _notifyIcon = new System.Windows.Forms.NotifyIcon
+            {
+                Icon = trayIcon,
+                Text = "SMT Alert",
+                ContextMenuStrip = contextMenu,
+                Visible = true
+            };
+            _notifyIcon.DoubleClick += (s, e) => RestoreFromTray();
+        }
+
+        private void RestoreFromTray()
+        {
+            Show();
+            WindowState = WindowState.Normal;
+            Activate();
+        }
+
+        private void ExitApplication()
+        {
+            _notifyIcon.Visible = false;
+            _notifyIcon.Dispose();
+            _notifyIcon = null;
+            Application.Current.Shutdown();
         }
 
         private void OnConfigChanged(object sender, PropertyChangedEventArgs e)
@@ -88,6 +135,9 @@ namespace SMTAlert
             Title = c != null && !string.IsNullOrEmpty(c.Name)
                 ? $"SMT Alert - {c.Name}"
                 : "SMT Alert";
+
+            if (_notifyIcon != null)
+                _notifyIcon.Text = Title;
         }
 
         // --- Button handlers ---
@@ -99,7 +149,7 @@ namespace SMTAlert
                 _overlayWindow = null;
                 return;
             }
-            _overlayWindow = new OverlayWindow();
+            _overlayWindow = new OverlayWindow { Owner = this };
             _overlayWindow.Closed += (s, a) => _overlayWindow = null;
             _overlayWindow.Show();
         }
@@ -112,7 +162,7 @@ namespace SMTAlert
                 _zkbWindow = null;
                 return;
             }
-            _zkbWindow = new ZKBMonitorWindow();
+            _zkbWindow = new ZKBMonitorWindow { Owner = this };
             _zkbWindow.Closed += (s, a) => _zkbWindow = null;
             _zkbWindow.Show();
         }
@@ -159,11 +209,18 @@ namespace SMTAlert
             App.CharacterMgr?.Shutdown();
             App.Config?.Save();
             StoreWindowPosition();
+            if (_notifyIcon != null)
+            {
+                _notifyIcon.Visible = false;
+                _notifyIcon.Dispose();
+                _notifyIcon = null;
+            }
         }
 
         private void Window_StateChanged(object sender, EventArgs e)
         {
-            // Window state change handler
+            if (App.Config.MinimizeToTray && WindowState == WindowState.Minimized)
+                Hide();
         }
 
         // --- Window position persistence ---

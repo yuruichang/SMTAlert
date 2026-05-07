@@ -94,6 +94,13 @@ namespace SMTAlert
             set { _zkbFilterByWarningRegion = value; OnPropertyChanged(nameof(ZkbFilterByWarningRegion)); }
         }
 
+        private string _zkbCustomSystems = "";
+        public string ZkbCustomSystems
+        {
+            get => _zkbCustomSystems;
+            set { _zkbCustomSystems = value ?? ""; OnPropertyChanged(nameof(ZkbCustomSystems)); }
+        }
+
         // --- Always on top ---
         private bool _alwaysOnTop = true;
         public bool AlwaysOnTop

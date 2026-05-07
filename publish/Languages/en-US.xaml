@@ -1,0 +1,79 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:s="clr-namespace:System;assembly=mscorlib">
+
+    <!-- App -->
+    <s:String x:Key="App_Title">SMT Alert</s:String>
+    <s:String x:Key="App_TrayShow">Show</s:String>
+    <s:String x:Key="App_TrayExit">Exit</s:String>
+
+    <!-- Main Window -->
+    <s:String x:Key="Main_Menu_Overlay">Open Radar Overlay</s:String>
+    <s:String x:Key="Main_Menu_ZKB">Open ZKB Monitor</s:String>
+    <s:String x:Key="Main_Menu_Settings">Settings</s:String>
+    <s:String x:Key="Main_Menu_AddChar">Add Character</s:String>
+    <s:String x:Key="Main_Menu_AlertChannel">Alert Channel Msgs</s:String>
+    <s:String x:Key="AlertCh_Title">Alert Channel Monitor</s:String>
+    <s:String x:Key="AlertCh_Channel">Channel:</s:String>
+    <s:String x:Key="AlertCh_ClearKeywords">Clear:</s:String>
+    <s:String x:Key="Main_CharList">Characters</s:String>
+    <s:String x:Key="Main_NoChar">No characters added. Click "Add Character" to login with EVE SSO.</s:String>
+    <s:String x:Key="Main_CharDelete">Delete Character</s:String>
+    <s:String x:Key="Main_CharDeleteConfirm">Are you sure you want to remove this character?</s:String>
+
+    <!-- Logon Window -->
+    <s:String x:Key="Logon_Title">SMTAlert - EVE SSO Login</s:String>
+    <s:String x:Key="Logon_Line1">SMTAlert is opening your browser for EVE SSO login.</s:String>
+    <s:String x:Key="Logon_Line2">Close this window after authorization is complete.</s:String>
+
+    <!-- Overlay Window -->
+    <s:String x:Key="Overlay_Title">SMTAlert Radar</s:String>
+    <s:String x:Key="Overlay_NoChar">No active character</s:String>
+    <s:String x:Key="Overlay_AlertLabel">Alert</s:String>
+    <s:String x:Key="Overlay_TipDrag">Drag to move the overlay.</s:String>
+    <s:String x:Key="Overlay_TipToggle">Toggle radar display mode.</s:String>
+    <s:String x:Key="Overlay_TipClose">Close the overlay.</s:String>
+
+    <!-- ZKB Monitor -->
+    <s:String x:Key="ZKB_Title">ZKB Monitor</s:String>
+    <s:String x:Key="ZKB_Column_Time">Time</s:String>
+    <s:String x:Key="ZKB_Column_System">System</s:String>
+    <s:String x:Key="ZKB_Column_Alliance">Alliance</s:String>
+    <s:String x:Key="ZKB_Column_ShipType">Ship Type</s:String>
+    <s:String x:Key="ZKB_CtxShowSys">Show System Details</s:String>
+    <s:String x:Key="ZKB_CtxOpen">Open Kill on ZKB</s:String>
+
+    <!-- Settings Window -->
+    <s:String x:Key="Settings_Title">SMTAlert Settings</s:String>
+    <s:String x:Key="Settings_Tab_General">General</s:String>
+    <s:String x:Key="Settings_Tab_Overlay">Overlay</s:String>
+    <s:String x:Key="Settings_Tab_ZKB">ZKB Monitor</s:String>
+    <s:String x:Key="Settings_Tab_Characters">Characters</s:String>
+    <s:String x:Key="Settings_General_Lang">Language</s:String>
+    <s:String x:Key="Settings_General_AlwaysOnTop">Always On Top</s:String>
+    <s:String x:Key="Settings_General_MinimizeToTray">Minimize to Tray</s:String>
+    <s:String x:Key="Settings_General_LogFolder">EVE Log Folder</s:String>
+    <s:String x:Key="Settings_Alert_Channel">Alert Channel Name</s:String>
+    <s:String x:Key="Settings_Alert_ClearKeywords">Clear Alert Keywords</s:String>
+    <s:String x:Key="Settings_Alert_ClearKeywordsTip">Multiple keywords separated by commas, e.g.: clear, safe, green</s:String>
+    <s:String x:Key="Settings_Ovl_BgOpacity">Background Opacity</s:String>
+    <s:String x:Key="Settings_Ovl_ContentOpacity">Content Opacity</s:String>
+    <s:String x:Key="Settings_Ovl_GathererMode">Gatherer Mode</s:String>
+    <s:String x:Key="Settings_Ovl_ShowFullRegion">Show Full Region (Hunter Mode)</s:String>
+    <s:String x:Key="Settings_Ovl_ShowSysNames">Show System Names</s:String>
+    <s:String x:Key="Settings_ZKB_BgOpacity">Background Opacity</s:String>
+    <s:String x:Key="Settings_ZKB_ContentOpacity">Content Opacity</s:String>
+    <s:String x:Key="Settings_ZKB_MaxKills">Max Kills Displayed</s:String>
+    <s:String x:Key="Settings_ZKB_ExpireMin">Kill Expire Time (minutes)</s:String>
+    <s:String x:Key="Settings_ZKB_FilterRegion">Filter by Warning Region</s:String>
+
+    <!-- Character Alert Settings -->
+    <s:String x:Key="Char_AlertRange">Alert Range (jumps)</s:String>
+    <s:String x:Key="Char_AlertEnabled">Alert Enabled</s:String>
+    <s:String x:Key="Char_Location">Location</s:String>
+    <s:String x:Key="Char_Online">Online</s:String>
+    <s:String x:Key="Char_SetActive">Set as Monitoring Target</s:String>
+    <s:String x:Key="Char_ActiveTag">[Active]</s:String>
+    <s:String x:Key="Char_Back">← Back</s:String>
+    <s:String x:Key="Char_Jumps">jumps</s:String>
+</ResourceDictionary>

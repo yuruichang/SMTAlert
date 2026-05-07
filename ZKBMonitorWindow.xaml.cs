@@ -108,19 +108,66 @@ namespace SMTAlert
             if (zs == null) return false;
 
             var c = App.ActiveCharacter;
+            bool filterByRegion = App.Config.ZkbFilterByWarningRegion;
+            bool hasCustomSystems = !string.IsNullOrWhiteSpace(App.Config.ZkbCustomSystems);
+            bool hasActiveChar = c != null && !string.IsNullOrEmpty(c.Region);
 
-            // Region filter only when user enables it (matching original SMT behavior)
-            if (App.Config.ZkbFilterByWarningRegion)
+            // If no filters active, show all
+            if (!filterByRegion && !hasCustomSystems)
+                return true;
+
+            // If no active character and region filter is sole filter, show all
+            if (!hasActiveChar && filterByRegion && !hasCustomSystems)
+                return true;
+
+            var sys = EveManager.Instance?.GetEveSystem(zs.SystemName);
+            if (sys == null)
+                return !filterByRegion && !hasCustomSystems; // Unknown system: show only if no filters
+
+            // Check character's region filter
+            if (filterByRegion && hasActiveChar && sys.Region == c.Region)
+                return true;
+
+            // Check custom system/region names (supports both English and Chinese)
+            if (hasCustomSystems)
             {
-                if (c == null || string.IsNullOrEmpty(c.Region))
-                    return true; // No active char = show all
+                var names = App.Config.ZkbCustomSystems
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-                var sys = EveManager.Instance?.GetEveSystem(zs.SystemName);
-                if (sys == null || sys.Region != c.Region)
-                    return false;
+                foreach (var name in names)
+                {
+                    if (string.IsNullOrEmpty(name)) continue;
+
+                    // Direct match against system name (English)
+                    if (string.Equals(sys.Name, name, StringComparison.OrdinalIgnoreCase))
+                        return true;
+
+                    // Direct match against region name (English)
+                    if (string.Equals(sys.Region, name, StringComparison.OrdinalIgnoreCase))
+                        return true;
+
+                    // Match against Chinese-translated system name
+                    if (EveManager.Translations.TryGetValue(sys.Name, out var zhSys) &&
+                        string.Equals(zhSys, name, StringComparison.OrdinalIgnoreCase))
+                        return true;
+
+                    // Match against Chinese-translated region name
+                    if (EveManager.Translations.TryGetValue(sys.Region, out var zhRegion) &&
+                        string.Equals(zhRegion, name, StringComparison.OrdinalIgnoreCase))
+                        return true;
+
+                    // Input is Chinese, resolve to English and match
+                    if (EveManager.ChineseToEnglish.TryGetValue(name, out var enName))
+                    {
+                        if (string.Equals(sys.Name, enName, StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(sys.Region, enName, StringComparison.OrdinalIgnoreCase))
+                            return true;
+                    }
+                }
+                return false;
             }
 
-            return true;
+            return false;
         }
 
         private void OnConfigChanged(object sender, PropertyChangedEventArgs e)
@@ -136,6 +183,7 @@ namespace SMTAlert
                     case nameof(AlertConfig.ZkbMaxKills):
                         _maxKills = App.Config.ZkbMaxKills; break;
                     case nameof(AlertConfig.ZkbFilterByWarningRegion):
+                    case nameof(AlertConfig.ZkbCustomSystems):
                         CollectionViewSource.GetDefaultView(ZKBKillList.ItemsSource)?.Refresh(); break;
                 }
             });

@@ -66,6 +66,8 @@
     <s:String x:Key="Settings_ZKB_MaxKills">Max Kills Displayed</s:String>
     <s:String x:Key="Settings_ZKB_ExpireMin">Kill Expire Time (minutes)</s:String>
     <s:String x:Key="Settings_ZKB_FilterRegion">Filter by Warning Region</s:String>
+    <s:String x:Key="Settings_ZKB_CustomSystems">Monitor Systems/Regions</s:String>
+    <s:String x:Key="Settings_ZKB_CustomSystemsTip">Multiple names separated by commas. Supports Chinese and English, e.g.: The Forge, Lonetrek, Jita</s:String>
 
     <!-- Character Alert Settings -->
     <s:String x:Key="Char_AlertRange">Alert Range (jumps)</s:String>

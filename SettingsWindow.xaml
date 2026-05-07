@@ -136,6 +136,11 @@
                     </StackPanel>
                     <CheckBox x:Name="ZkbFilterRegionChk" Content="{DynamicResource Settings_ZKB_FilterRegion}"
                               Foreground="White" Margin="0,5" Checked="ZkbFilterRegion_Changed" Unchecked="ZkbFilterRegion_Changed" />
+                    <StackPanel Orientation="Horizontal" Margin="0,5">
+                        <Label Content="{DynamicResource Settings_ZKB_CustomSystems}" Width="160" Foreground="White" />
+                        <TextBox x:Name="ZkbCustomSystemsTxt" Width="240" TextChanged="ZkbCustomSystems_Changed"
+                                 ToolTip="{DynamicResource Settings_ZKB_CustomSystemsTip}" />
+                    </StackPanel>
                 </StackPanel>
             </TabItem>
 
