@@ -1,0 +1,15 @@
+# Build output
+bin/
+obj/
+
+# Release artifacts
+*.zip
+
+# IDE
+.vs/
+*.user
+*.DotSettings
+
+# OS
+.DS_Store
+Thumbs.db
