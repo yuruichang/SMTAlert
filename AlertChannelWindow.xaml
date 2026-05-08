@@ -19,6 +19,7 @@
         <ListBox x:Name="MessageListBox" Grid.Row="1"
                  Background="#FF1A1A1A" Foreground="White"
                  BorderBrush="#FF444444" BorderThickness="1"
-                 VirtualizingPanel.ScrollUnit="Pixel" />
+                 VirtualizingPanel.ScrollUnit="Pixel"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" />
     </Grid>
 </Window>

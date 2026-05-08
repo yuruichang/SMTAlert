@@ -61,6 +61,7 @@
                   GridLinesVisibility="None" MouseDoubleClick="ZKBKillList_MouseDoubleClick"
                   PreviewMouseLeftButtonDown="ZKBKillList_PreviewMouseLeftButtonDown"
                   ColumnHeaderStyle="{StaticResource ZkbColumnHeaderStyle}"
+                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                   Background="Transparent" Opacity="0.85">
             <DataGrid.Columns>
                 <DataGridTextColumn x:Name="ColTime"
@@ -71,34 +72,55 @@
                             <TextBlock Text="{DynamicResource ZKB_Column_Time}" />
                         </DataTemplate>
                     </DataGridTextColumn.HeaderTemplate>
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                            <Setter Property="Margin" Value="2,0" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn x:Name="ColSystem"
-                                   Binding="{Binding SystemName}" Width="*"
-                                   IsReadOnly="True" CanUserReorder="False" CanUserSort="False">
-                    <DataGridTextColumn.HeaderTemplate>
+                <DataGridTemplateColumn x:Name="ColSystem" Width="*"
+                                        IsReadOnly="True" CanUserReorder="False" CanUserSort="False">
+                    <DataGridTemplateColumn.HeaderTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{DynamicResource ZKB_Column_System}" />
+                            <TextBlock Text="{DynamicResource ZKB_Column_System}" HorizontalAlignment="Center" />
                         </DataTemplate>
-                    </DataGridTextColumn.HeaderTemplate>
-                </DataGridTextColumn>
-                <DataGridTextColumn x:Name="ColAlliance"
-                                   Binding="{Binding VictimAllianceName}" Width="*"
-                                   IsReadOnly="True" CanUserReorder="False" CanUserSort="False">
-                    <DataGridTextColumn.HeaderTemplate>
+                    </DataGridTemplateColumn.HeaderTemplate>
+                    <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{DynamicResource ZKB_Column_Alliance}" />
+                            <TextBlock Text="{Binding SystemName}" TextWrapping="Wrap"
+                                       VerticalAlignment="Center" HorizontalAlignment="Center" Margin="2,0" />
                         </DataTemplate>
-                    </DataGridTextColumn.HeaderTemplate>
-                </DataGridTextColumn>
-                <DataGridTextColumn x:Name="ColShipType"
-                                   Binding="{Binding ShipTypeDisplay}" Width="*"
-                                   IsReadOnly="True" CanUserReorder="False" CanUserSort="False">
-                    <DataGridTextColumn.HeaderTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn x:Name="ColAlliance" Width="*"
+                                        IsReadOnly="True" CanUserReorder="False" CanUserSort="False">
+                    <DataGridTemplateColumn.HeaderTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{DynamicResource ZKB_Column_ShipType}" />
+                            <TextBlock Text="{DynamicResource ZKB_Column_Alliance}" HorizontalAlignment="Center" />
                         </DataTemplate>
-                    </DataGridTextColumn.HeaderTemplate>
-                </DataGridTextColumn>
+                    </DataGridTemplateColumn.HeaderTemplate>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding AllianceDisplay}" TextWrapping="Wrap"
+                                       VerticalAlignment="Center" HorizontalAlignment="Center" Margin="2,0" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn x:Name="ColShipType" Width="*"
+                                        IsReadOnly="True" CanUserReorder="False" CanUserSort="False">
+                    <DataGridTemplateColumn.HeaderTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{DynamicResource ZKB_Column_ShipType}" HorizontalAlignment="Center" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.HeaderTemplate>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding ShipTypeDisplay}" TextWrapping="Wrap"
+                                       VerticalAlignment="Center" HorizontalAlignment="Center" Margin="2,0" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTextColumn x:Name="ColValue"
                                    Binding="{Binding TotalValueDisplay}" Width="80"
                                    IsReadOnly="True" CanUserReorder="False" CanUserSort="False">

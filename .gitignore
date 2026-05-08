@@ -1,15 +1,10 @@
-# Build output
 bin/
 obj/
-
-# Release artifacts
-*.zip
-
-# IDE
+publish/
 .vs/
 *.user
-*.DotSettings
-
-# OS
-.DS_Store
-Thumbs.db
+*.suo
+*.cache
+*.sln.DotSettings.user
+.claude/
+*.zip

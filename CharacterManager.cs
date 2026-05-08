@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
@@ -34,7 +35,7 @@ namespace SMTAlert
 
         private Timer _updateTimer;
         private Timer _warningTimer;
-        private HashSet<string> _recentAlertedSystems = new();
+        private Dictionary<string, DateTime> _recentAlertedSystems = new(); // system → last alert time (debounce)
         private Dictionary<string, DateTime> _systemFirstWarned = new();
         private int _updateTickCounter = 0;
 
@@ -43,6 +44,7 @@ namespace SMTAlert
         private Dictionary<string, DateTime> _reporterLastIntelTime = new(); // reporterName → last intel time seen
         private Dictionary<string, HashSet<string>> _systemReporters = new(); // system → set of reporter names
         private Dictionary<string, DateTime> _systemClearedAt = new();    // system → time when marked clear
+        private Dictionary<string, DateTime> _reporterMovedClear = new();  // system → time when last reporter left (clear due to movement)
 
         // Last intel text per system (for tooltip) — written from Timer thread, read from UI thread
         public System.Collections.Concurrent.ConcurrentDictionary<string, string> SystemLastIntelText { get; private set; } = new();
@@ -248,9 +250,12 @@ namespace SMTAlert
             {
                 foreach (var sysName in newest.Systems)
                 {
-                    if (systemsInRange.Contains(sysName) && !_recentAlertedSystems.Contains(sysName))
+                    // Debounce: only re-alert the same system after 30 seconds
+                    if (systemsInRange.Contains(sysName) &&
+                        (!_recentAlertedSystems.TryGetValue(sysName, out DateTime lastAlert) ||
+                         (DateTime.UtcNow - lastAlert).TotalSeconds > 30))
                     {
-                        _recentAlertedSystems.Add(sysName);
+                        _recentAlertedSystems[sysName] = DateTime.UtcNow;
                         shouldAlert = true;
                     }
                 }
@@ -258,16 +263,16 @@ namespace SMTAlert
 
             if (shouldAlert)
             {
-                // Play alert sound on a background thread (SoundPlayer.Play blocks briefly)
+                // Play alert sound on a background thread
                 Task.Run(() => AlertSound.Play());
             }
 
-            // Clean up old entries periodically
-            if (_recentAlertedSystems.Count > 100)
+            // Clean up stale debounce entries (older than 60 seconds)
+            var debounceCutoff = DateTime.UtcNow.AddSeconds(-60);
+            foreach (var key in _recentAlertedSystems.Keys.ToList())
             {
-                var cutoff = DateTime.UtcNow.AddMinutes(-2);
-                // Just clear entirely if too large — simple approach
-                _recentAlertedSystems.Clear();
+                if (_recentAlertedSystems[key] < debounceCutoff)
+                    _recentAlertedSystems.Remove(key);
             }
         }
 
@@ -324,6 +329,13 @@ namespace SMTAlert
                                 if (!systemsInRange.Contains(sysName))
                                     continue;
 
+                                // Skip old intel for systems cleared by reporter movement —
+                                // the reporter has left this system, so stale intel here
+                                // should not re-warn it.
+                                if (_reporterMovedClear.TryGetValue(sysName, out DateTime movedAt) &&
+                                    intel.IntelTime <= movedAt)
+                                    continue;
+
                                 // Track last intel text for tooltip (with time prefix)
                                 SystemLastIntelText[sysName] = $"[{intel.IntelTime:HH:mm:ss}] {intel.IntelString.Trim()}";
 
@@ -352,6 +364,15 @@ namespace SMTAlert
                                         }
                                     }
                                 }
+                            }
+                        }
+
+                        // Systems cleared because all reporters left — add to cleared if in range
+                        foreach (var kvp in _reporterMovedClear.ToList())
+                        {
+                            if (systemsInRange.Contains(kvp.Key) && !warned.Contains(kvp.Key) && !cleared.Contains(kvp.Key))
+                            {
+                                cleared.Add(kvp.Key);
                             }
                         }
 
@@ -387,6 +408,13 @@ namespace SMTAlert
                         {
                             if (!cleared.Contains(key))
                                 _systemClearedAt.Remove(key);
+                        }
+
+                        // Clean up reporter-moved clears that have reverted
+                        foreach (var key in _reporterMovedClear.Keys.ToList())
+                        {
+                            if (!_systemClearedAt.ContainsKey(key))
+                                _reporterMovedClear.Remove(key);
                         }
 
                         c.WarningSystems = warned;
@@ -581,6 +609,7 @@ namespace SMTAlert
                     {
                         _systemReporters.Remove(prevSystem);
                         _systemFirstWarned.Remove(prevSystem);
+                        _reporterMovedClear[prevSystem] = DateTime.UtcNow;
                     }
                 }
             }
@@ -616,6 +645,11 @@ namespace SMTAlert
 
                 // Words within a segment are part of the same identifier (single-space separated)
                 var words = segment.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+                // Skip purely numeric segments — these are ship counts, not character names
+                if (words.All(w => int.TryParse(w.TrimEnd(',', '.', '!', '?', ':', ';', '*'), out _)))
+                    continue;
+
                 var nameParts = new List<string>();
                 foreach (var word in words)
                 {
