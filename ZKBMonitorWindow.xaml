@@ -153,6 +153,7 @@
             <DataGrid.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="{DynamicResource ZKB_CtxOpen}" Click="ContextMenu_OpenZKB_Click" />
+                    <MenuItem Header="{DynamicResource ZKB_CtxCopyLink}" Click="ContextMenu_CopyInGameLink_Click" />
                 </ContextMenu>
             </DataGrid.ContextMenu>
         </DataGrid>

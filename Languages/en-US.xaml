@@ -43,6 +43,7 @@
     <s:String x:Key="ZKB_Column_Value">Value</s:String>
     <s:String x:Key="ZKB_CtxShowSys">Show System Details</s:String>
     <s:String x:Key="ZKB_CtxOpen">Open Kill on ZKB</s:String>
+    <s:String x:Key="ZKB_CtxCopyLink">Copy In-Game Link</s:String>
 
     <!-- Settings Window -->
     <s:String x:Key="Settings_Title">SMTAlert Settings</s:String>

@@ -1,10 +1,18 @@
 bin/
 obj/
 publish/
+
+# Release artifacts
+*.zip
+
+# IDE
 .vs/
 *.user
 *.suo
 *.cache
 *.sln.DotSettings.user
 .claude/
-*.zip
+
+# OS
+.DS_Store
+Thumbs.db

@@ -43,6 +43,7 @@
     <s:String x:Key="ZKB_Column_Value">价值</s:String>
     <s:String x:Key="ZKB_CtxShowSys">查看星系详情</s:String>
     <s:String x:Key="ZKB_CtxOpen">在 ZKB 中打开</s:String>
+    <s:String x:Key="ZKB_CtxCopyLink">复制游戏内链接</s:String>
 
     <!-- Settings Window -->
     <s:String x:Key="Settings_Title">SMTAlert 设置</s:String>

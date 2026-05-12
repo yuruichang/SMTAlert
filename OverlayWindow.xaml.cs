@@ -22,6 +22,7 @@ namespace SMTAlert
         private Brush _warningSysBrush;
         private Brush _clearSysBrush;
         private Brush _staleSysBrush;
+        private Brush _historySysBrush;
         private Brush _jumpLineBrush;
         private Brush _outOfRegionOutlineBrush;
         private Brush _outOfRegionFillBrush;
@@ -73,9 +74,10 @@ namespace SMTAlert
             _sysLocationBrush = new SolidColorBrush(Colors.Orange);
             _sysFillBrush = new SolidColorBrush(Colors.Gray);
             _warningSysBrush = new SolidColorBrush(Colors.Red) { Opacity = 0.8 };
-            _clearSysBrush = new SolidColorBrush(Colors.LimeGreen) { Opacity = 0.7 };
-            _staleSysBrush = new SolidColorBrush(Colors.White) { Opacity = 0.6 };
-            _jumpLineBrush = new SolidColorBrush(Colors.White) { Opacity = 0.5f };
+            _clearSysBrush = new SolidColorBrush(Colors.Orange) { Opacity = 0.8 };
+            _staleSysBrush = new SolidColorBrush(Colors.Yellow) { Opacity = 0.8 };
+            _historySysBrush = new SolidColorBrush(Colors.LightGray) { Opacity = 0.6 };
+            _jumpLineBrush = new SolidColorBrush(Colors.White) { Opacity = 0.75f };
 
             var outColor = Colors.Red;
             outColor.R = (byte)(outColor.R * 0.4);
@@ -379,6 +381,7 @@ namespace SMTAlert
             var warningSet = new HashSet<string>();
             var clearSet = new HashSet<string>();
             var staleSet = new HashSet<string>();
+            var historySet = new HashSet<string>();
 
             // Build intel-based warning/clear/stale sets directly from IntelDataList.
             // This mirrors the original SMT Overlay.xaml.cs UpdateIntelData approach.
@@ -389,7 +392,8 @@ namespace SMTAlert
             {
                 var now = DateTime.UtcNow;
                 var freshCutoff = now.AddMinutes(-App.Config.AlertFreshMinutes);
-                var oldCutoff = now.AddMinutes(-(App.Config.AlertFreshMinutes + App.Config.AlertExpireMinutes));
+                var staleCutoff = now.AddMinutes(-(App.Config.AlertFreshMinutes + App.Config.AlertExpireMinutes));
+                var historyCutoff = now.AddMinutes(-(App.Config.AlertFreshMinutes + App.Config.AlertExpireMinutes * 2));
 
                 lock (intelList)
                 {
@@ -398,8 +402,10 @@ namespace SMTAlert
                     for (int idx = intelList.Count - 1; idx >= 0; idx--)
                     {
                         var intel = intelList[idx];
-                        if (intel.IntelTime < oldCutoff) continue;
+                        if (intel.IntelTime < historyCutoff) continue;
                         bool isFresh = intel.IntelTime >= freshCutoff;
+                        bool isStaleAge = !isFresh && intel.IntelTime >= staleCutoff;
+                        bool isHistoryAge = !isFresh && !isStaleAge;
 
                         foreach (var sysName in intel.Systems)
                         {
@@ -414,6 +420,7 @@ namespace SMTAlert
                             {
                                 warningSet.Remove(sysName);
                                 staleSet.Remove(sysName);
+                                historySet.Remove(sysName);
                                 clearSet.Add(sysName);
                             }
                             else if (isFresh)
@@ -421,10 +428,15 @@ namespace SMTAlert
                                 clearSet.Remove(sysName);
                                 warningSet.Add(sysName);
                             }
-                            else
+                            else if (isStaleAge)
                             {
                                 if (!warningSet.Contains(sysName) && !clearSet.Contains(sysName))
                                     staleSet.Add(sysName);
+                            }
+                            else if (isHistoryAge)
+                            {
+                                if (!warningSet.Contains(sysName) && !clearSet.Contains(sysName) && !staleSet.Contains(sysName))
+                                    historySet.Add(sysName);
                             }
                         }
                     }
@@ -442,12 +454,16 @@ namespace SMTAlert
                     { if (!warningSet.Contains(s) && !clearSet.Contains(s)) staleSet.Add(s); }
             }
 
-            // Resolve priority: warning > stale > clear
+            // Resolve priority: urgent(warning) > stale > history > clear
             var finalStaleSet = new HashSet<string>(staleSet);
+            var finalHistorySet = new HashSet<string>(historySet);
             var finalClearSet = new HashSet<string>(clearSet);
             finalStaleSet.ExceptWith(warningSet);
+            finalHistorySet.ExceptWith(warningSet);
+            finalHistorySet.ExceptWith(finalStaleSet);
             finalClearSet.ExceptWith(warningSet);
             finalClearSet.ExceptWith(finalStaleSet);
+            finalClearSet.ExceptWith(finalHistorySet);
 
             // Clear old jump lines
             foreach (var line in _jumpLines)
@@ -508,7 +524,8 @@ namespace SMTAlert
                 bool isCurrent = kvp.Key == c?.Location;
                 bool isWarning = warningSet.Contains(kvp.Key);
                 bool isStale = !isWarning && finalStaleSet.Contains(kvp.Key);
-                bool isClear = !isWarning && !isStale && finalClearSet.Contains(kvp.Key);
+                bool isHistory = !isWarning && !isStale && finalHistorySet.Contains(kvp.Key);
+                bool isClear = !isWarning && !isStale && !isHistory && finalClearSet.Contains(kvp.Key);
 
                 // Draw system shape
                 if (entry.Shape == null)
@@ -518,12 +535,31 @@ namespace SMTAlert
                 }
                 entry.Shape.Width = sysSize;
                 entry.Shape.Height = sysSize;
-                entry.Shape.Fill = isCurrent ? new SolidColorBrush(Colors.Orange) : _sysFillBrush;
+                // Hunter mode: color fill by security status (matching SMT style)
+                if (isCurrent)
+                {
+                    entry.Shape.Fill = new SolidColorBrush(Colors.Orange);
+                }
+                else if (!_gathererMode)
+                {
+                    double trueSecVal = sys.TrueSec;
+                    if (trueSecVal >= 0.45)
+                        trueSecVal = 1.0;
+                    else if (trueSecVal > 0.0)
+                        trueSecVal = 0.4;
+                    entry.Shape.Fill = new SolidColorBrush(GetSecStatusColour(trueSecVal));
+                }
+                else
+                {
+                    entry.Shape.Fill = _sysFillBrush;
+                }
+
                 entry.Shape.Stroke = isCurrent ? _sysLocationBrush :
                     isWarning ? _warningSysBrush :
                     isStale ? _staleSysBrush :
+                    isHistory ? _historySysBrush :
                     isClear ? _clearSysBrush : _sysOutlineBrush;
-                entry.Shape.StrokeThickness = isWarning || isStale || isClear ? 2.5f : (_gathererMode ? 2f : 1f);
+                entry.Shape.StrokeThickness = isWarning || isStale || isHistory || isClear ? 2.5f : (_gathererMode ? 2f : 1f);
                 Canvas.SetLeft(entry.Shape, canvasPos.X - sysSize / 2);
                 Canvas.SetTop(entry.Shape, canvasPos.Y - sysSize / 2);
                 Canvas.SetZIndex(entry.Shape, 100);
@@ -545,8 +581,8 @@ namespace SMTAlert
                     ? $"{kvp.Key} ({sys.TrueSec:n2})"
                     : tipText;
 
-                // Draw highlight for warning/stale/clear
-                if (isWarning || isStale || isClear)
+                // Draw highlight ellipse for systems with intel (matching SMT style)
+                if (isWarning || isStale || isHistory || isClear)
                 {
                     if (entry.WarningEllipse == null)
                     {
@@ -559,13 +595,13 @@ namespace SMTAlert
                     entry.WarningEllipse.Width = sysSize + WarningOversize;
                     entry.WarningEllipse.Height = sysSize + WarningOversize;
                     entry.WarningEllipse.Stroke = isWarning ? _warningSysBrush :
-                        isStale ? _staleSysBrush : _clearSysBrush;
-                    entry.WarningEllipse.StrokeThickness = 2f;
+                        isStale ? _staleSysBrush :
+                        isHistory ? _historySysBrush : _clearSysBrush;
+                    // SMT style: thick stroke (5px) for intel indicator, red fill only for urgent
+                    entry.WarningEllipse.StrokeThickness = 5f;
                     entry.WarningEllipse.Fill = isWarning
-                        ? new SolidColorBrush(Colors.Red) { Opacity = 0.15f }
-                        : isStale
-                            ? new SolidColorBrush(Colors.White) { Opacity = 0.10f }
-                            : new SolidColorBrush(Colors.LimeGreen) { Opacity = 0.12f };
+                        ? new SolidColorBrush(Colors.Red) { Opacity = 0.25f }
+                        : new SolidColorBrush(Colors.Transparent);
                     Canvas.SetLeft(entry.WarningEllipse, canvasPos.X - (sysSize + WarningOversize) / 2);
                     Canvas.SetTop(entry.WarningEllipse, canvasPos.Y - (sysSize + WarningOversize) / 2);
                     Canvas.SetZIndex(entry.WarningEllipse, 90);
@@ -619,7 +655,7 @@ namespace SMTAlert
                         X1 = canvasPos.X, Y1 = canvasPos.Y,
                         X2 = targetPos.X, Y2 = targetPos.Y,
                         Stroke = _jumpLineBrush,
-                        StrokeThickness = 0.5f,
+                        StrokeThickness = _gathererMode ? 2f : 1f,
                         IsHitTestVisible = false
                     };
                     Canvas.SetZIndex(line, 50);
@@ -762,6 +798,21 @@ namespace SMTAlert
             App.CharacterMgr.CharacterPositionsUpdated -= OnCharacterPositionsUpdated;
             App.Config.PropertyChanged -= OnConfigChanged;
             base.OnClosed(e);
+        }
+
+        /// <summary>
+        /// Returns a colour representing the security status of a system (EVE convention).
+        /// </summary>
+        private static Color GetSecStatusColour(double sec)
+        {
+            if (sec >= 0.9) return Color.FromRgb(0x46, 0xBF, 0x46); // Bright green
+            if (sec >= 0.7) return Color.FromRgb(0x59, 0xB0, 0x59); // Green
+            if (sec >= 0.5) return Color.FromRgb(0x69, 0xA1, 0x69); // Duller green
+            if (sec >= 0.3) return Color.FromRgb(0x8A, 0x8A, 0x4B); // Olive
+            if (sec >= 0.1) return Color.FromRgb(0xB0, 0x72, 0x36); // Orange
+            if (sec >= 0.0) return Color.FromRgb(0xC8, 0x4C, 0x2D); // Red-orange
+            if (sec >= -0.5) return Color.FromRgb(0xB0, 0x2A, 0x2A); // Red
+            return Color.FromRgb(0x8C, 0x1C, 0x1C); // Dark red
         }
     }
 

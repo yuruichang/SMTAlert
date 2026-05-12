@@ -94,6 +94,27 @@ namespace SMTAlert
             }
         }
 
+        private void ContextMenu_CopyInGameLink_Click(object sender, RoutedEventArgs e)
+        {
+            var zs = ZKBKillList.SelectedItem as SMT.EVEData.ZKillRedisQ.ZKBDataSimple;
+            if (zs == null || string.IsNullOrEmpty(zs.Hash)) return;
+
+            string victimName = !string.IsNullOrEmpty(zs.VictimName)
+                ? zs.VictimName
+                : "Unknown";
+
+            string link = $"<url=killReport:{zs.KillID}:{zs.Hash}>Kill: {victimName} ({zs.ShipType})</url>";
+
+            try
+            {
+                Clipboard.SetText(link);
+            }
+            catch
+            {
+                // Clipboard may be temporarily locked by another process; silently ignore.
+            }
+        }
+
         private void ZKBKillList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             var zs = ZKBKillList.SelectedItem as SMT.EVEData.ZKillRedisQ.ZKBDataSimple;
