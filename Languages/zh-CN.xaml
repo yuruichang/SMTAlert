@@ -33,6 +33,7 @@
     <s:String x:Key="Overlay_TipDrag">按住拖动悬浮窗</s:String>
     <s:String x:Key="Overlay_TipToggle">切换雷达显示模式</s:String>
     <s:String x:Key="Overlay_TipClose">关闭悬浮窗</s:String>
+    <s:String x:Key="Overlay_TipNames">切换显示星系名称</s:String>
 
     <!-- ZKB Monitor -->
     <s:String x:Key="ZKB_Title">ZKB 击杀推送</s:String>

@@ -33,6 +33,7 @@
     <s:String x:Key="Overlay_TipDrag">Drag to move the overlay.</s:String>
     <s:String x:Key="Overlay_TipToggle">Toggle radar display mode.</s:String>
     <s:String x:Key="Overlay_TipClose">Close the overlay.</s:String>
+    <s:String x:Key="Overlay_TipNames">Toggle system name labels.</s:String>
 
     <!-- ZKB Monitor -->
     <s:String x:Key="ZKB_Title">ZKB Monitor</s:String>

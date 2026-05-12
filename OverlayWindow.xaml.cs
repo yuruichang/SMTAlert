@@ -142,7 +142,7 @@ namespace SMTAlert
                         RefreshView(); break;
                     case nameof(AlertConfig.OverlayShowSystemNames):
                         _showSystemNames = App.Config.OverlayShowSystemNames;
-                        RefreshView(); break;
+                        RefreshButtonStates(); RefreshView(); break;
                 }
             });
         }
@@ -678,6 +678,10 @@ namespace SMTAlert
         {
             overlay_HunterButton.Visibility = _gathererMode ? Visibility.Collapsed : Visibility.Visible;
             overlay_GathererButton.Visibility = _gathererMode ? Visibility.Visible : Visibility.Collapsed;
+            overlay_NamesButton.Opacity = _showSystemNames ? 0.9 : 0.4;
+            overlay_NamesButton.Foreground = _showSystemNames
+                ? new SolidColorBrush(Colors.White)
+                : new SolidColorBrush(Color.FromRgb(0x88, 0x88, 0x88));
         }
 
         // --- Canvas mouse events (zoom/pan) ---
@@ -770,6 +774,15 @@ namespace SMTAlert
         {
             _gathererMode = false;
             App.Config.OverlayGathererMode = false;
+            RefreshButtonStates();
+            RefreshView();
+        }
+
+        private void Overlay_ToggleNames(object sender, MouseButtonEventArgs e)
+        {
+            _showSystemNames = !_showSystemNames;
+            App.Config.OverlayShowSystemNames = _showSystemNames;
+            App.Config.Save();
             RefreshButtonStates();
             RefreshView();
         }
