@@ -82,4 +82,8 @@
     <s:String x:Key="Char_ActiveTag">[当前]</s:String>
     <s:String x:Key="Char_Back">← 返回</s:String>
     <s:String x:Key="Char_Jumps">跳</s:String>
+
+    <!-- Update Check -->
+    <s:String x:Key="Update_Title">发现新版本</s:String>
+    <s:String x:Key="Update_Available">发现新版本！\n\n当前版本: {0}\n最新版本: {1}\n\n打开发布页面下载更新？</s:String>
 </ResourceDictionary>

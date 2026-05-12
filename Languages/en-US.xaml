@@ -82,4 +82,8 @@
     <s:String x:Key="Char_ActiveTag">[Active]</s:String>
     <s:String x:Key="Char_Back">← Back</s:String>
     <s:String x:Key="Char_Jumps">jumps</s:String>
+
+    <!-- Update Check -->
+    <s:String x:Key="Update_Title">Update Available</s:String>
+    <s:String x:Key="Update_Available">A new version is available!\n\nCurrent: {0}\nLatest: {1}\n\nOpen the release page to download?</s:String>
 </ResourceDictionary>

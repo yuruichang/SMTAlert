@@ -1,3 +1,6 @@
+using System;
+using System.Net.Http;
+using System.Threading.Tasks;
 using System.Windows;
 using SMT.EVEData;
 
@@ -8,6 +11,12 @@ namespace SMTAlert
     /// </summary>
     public partial class App : Application
     {
+        /// <summary>Current version of the application.</summary>
+        public const string AppVersion = "1.7";
+
+        /// <summary>GitHub repository path for update checks.</summary>
+        public const string GitHubRepo = "yuruichang/SMTAlert";
+
         public static AlertConfig Config { get; private set; }
         public static CharacterManager CharacterMgr { get; private set; }
         public static ZKillRedisQ ZKillFeed { get; private set; }
@@ -88,6 +97,66 @@ namespace SMTAlert
                         item.RefreshShipTypeDisplay();
                 });
             });
+
+            // Check for updates on GitHub
+            _ = CheckForUpdateAsync();
+        }
+
+        /// <summary>
+        /// Checks the latest release on GitHub and prompts the user if a newer version is available.
+        /// </summary>
+        private static async Task CheckForUpdateAsync()
+        {
+            try
+            {
+                using var client = new HttpClient();
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("SMTAlert");
+                client.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github.v3+json");
+
+                var response = await client.GetStringAsync($"https://api.github.com/repos/{GitHubRepo}/releases/latest");
+                var json = System.Text.Json.JsonDocument.Parse(response);
+                var latestTag = json.RootElement.GetProperty("tag_name").GetString();
+                var releaseUrl = json.RootElement.GetProperty("html_url").GetString();
+
+                if (string.IsNullOrEmpty(latestTag)) return;
+
+                // Strip leading "v" if present and compare versions
+                string latestVersionStr = latestTag.TrimStart('v');
+                string currentVersionStr = AppVersion;
+
+                if (Version.TryParse(latestVersionStr, out var latestVersion) &&
+                    Version.TryParse(currentVersionStr, out var currentVersion) &&
+                    latestVersion > currentVersion)
+                {
+                    // New version available — prompt on UI thread
+                    var appWindow = Current?.Dispatcher;
+                    if (appWindow == null) return;
+
+                    await appWindow.InvokeAsync(() =>
+                    {
+                        string msg = string.Format(
+                            (string)Current.TryFindResource("Update_Available") ??
+                            "A new version is available!\n\nCurrent: {0}\nLatest: {1}\n\nOpen the release page to download?",
+                            currentVersionStr, latestVersionStr);
+
+                        string title = (string)Current.TryFindResource("Update_Title") ?? "Update Available";
+
+                        if (MessageBox.Show(AppWindow, msg, title, MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.Yes)
+                        {
+                            if (!string.IsNullOrEmpty(releaseUrl))
+                                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                                {
+                                    FileName = releaseUrl,
+                                    UseShellExecute = true
+                                });
+                        }
+                    });
+                }
+            }
+            catch
+            {
+                // Silently ignore network/parse errors — update check is non-critical
+            }
         }
 
         private static void UpdateIntelChannelFilter()
