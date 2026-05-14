@@ -85,6 +85,9 @@
     <s:String x:Key="Char_Back">← 返回</s:String>
     <s:String x:Key="Char_Jumps">跳</s:String>
 
+    <!-- Settings Footer -->
+    <s:String x:Key="Settings_Version">版本</s:String>
+
     <!-- Update Check -->
     <s:String x:Key="Update_Title">更新可用</s:String>
     <s:String x:Key="Update_Available">有新版本可用！\n\n当前版本: {0}\n最新版本: {1}\n\n打开发布页面下载？</s:String>

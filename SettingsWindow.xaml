@@ -5,6 +5,10 @@
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
         Background="#FF232223">
     <Grid Background="#FF232223" Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
         <TabControl Background="Transparent">
             <TabControl.Resources>
                 <BooleanToVisibilityConverter x:Key="BoolToVis" />
@@ -213,5 +217,16 @@
                 </Grid>
             </TabItem>
         </TabControl>
+        <Border Grid.Row="1" BorderThickness="0" Padding="0,8,0,0">
+            <TextBlock Foreground="#FF888888" FontSize="11" HorizontalAlignment="Right">
+                <Run Text="{DynamicResource Settings_Version}" />
+                <Run x:Name="VersionText" />
+                <Run Text=" | " />
+                <Hyperlink x:Name="RepoLink" NavigateUri="https://github.com/yuruichang/SMTAlert"
+                           RequestNavigate="RepoLink_RequestNavigate" Foreground="#FF5588FF">
+                    GitHub
+                </Hyperlink>
+            </TextBlock>
+        </Border>
     </Grid>
 </Window>

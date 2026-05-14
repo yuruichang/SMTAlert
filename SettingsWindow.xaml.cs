@@ -73,6 +73,8 @@ namespace SMTAlert
             ZkbCustomSystemsTxt.Text = cfg.ZkbCustomSystems;
 
             _initializing = false;
+
+            VersionText.Text = App.AppVersion;
         }
 
         private void OnAlwaysOnTopChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -363,6 +365,12 @@ namespace SMTAlert
                 c.AlertRange = range;
                 App.CharacterMgr.SaveCharacters();
             }
+        }
+
+        private void RepoLink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
+            e.Handled = true;
         }
 
         private void AlertEnabled_Changed(object sender, RoutedEventArgs e)
