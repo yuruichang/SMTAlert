@@ -314,8 +314,6 @@ namespace SMTAlert
         {
             var s = Properties.Settings.Default;
             s.OverlayWindow_Open = _overlayWindows.Count > 0;
-            s.OverlayWindow_CharacterName = _overlayWindows.Count > 0 && _overlayWindows.First().Key != null
-                ? _overlayWindows.First().Key.Name : "";
             s.ZKBMonitorWindow_Open = _zkbWindow != null;
             s.AlertChannelWindow_Open = _alertChannelWindow != null;
             s.MainWindow_MinimizedToTray = WindowState == WindowState.Minimized || !IsVisible;
@@ -330,19 +328,6 @@ namespace SMTAlert
             {
                 WindowState = WindowState.Minimized;
                 Hide();
-            }
-
-            if (s.OverlayWindow_Open && !string.IsNullOrEmpty(s.OverlayWindow_CharacterName))
-            {
-                var character = App.CharacterMgr.Characters
-                    .FirstOrDefault(c => c.Name == s.OverlayWindow_CharacterName);
-                if (character != null)
-                {
-                    var overlay = new OverlayWindow(character) { Owner = this };
-                    overlay.Closed += (snd, a) => _overlayWindows.Remove(character);
-                    _overlayWindows[character] = overlay;
-                    overlay.Show();
-                }
             }
 
             if (s.ZKBMonitorWindow_Open)

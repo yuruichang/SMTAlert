@@ -804,31 +804,7 @@ namespace SMTAlert
         }
 
         // --- Window position persistence (per character) ---
-        private static Dictionary<string, string> _savedOverlayPlacements = LoadSavedPlacements();
-
-        private static Dictionary<string, string> LoadSavedPlacements()
-        {
-            try
-            {
-                string raw = Properties.Settings.Default.OverlayWindow_placement;
-                if (!string.IsNullOrEmpty(raw))
-                    return Newtonsoft.Json.JsonConvert
-                        .DeserializeObject<Dictionary<string, string>>(raw) ?? new();
-            }
-            catch { }
-            return new();
-        }
-
-        private static void SavePlacementsToSettings()
-        {
-            try
-            {
-                Properties.Settings.Default.OverlayWindow_placement =
-                    Newtonsoft.Json.JsonConvert.SerializeObject(_savedOverlayPlacements);
-                Properties.Settings.Default.Save();
-            }
-            catch { }
-        }
+        private static Dictionary<string, string> _savedOverlayPlacements = new();
 
         private void LoadWindowPosition()
         {
@@ -844,7 +820,6 @@ namespace SMTAlert
             {
                 _savedOverlayPlacements[_character.Name] =
                     WindowPlacement.GetPlacement(new WindowInteropHelper(this).Handle);
-                SavePlacementsToSettings();
             }
         }
 
