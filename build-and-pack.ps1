@@ -17,6 +17,10 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+# 清理 self-contained 运行时目录（framework-dependent 部署不需要）
+$rtDir = Join-Path $ProjectDir "bin\x64\Release\net8.0-windows\win-x64"
+if (Test-Path $rtDir) { Remove-Item -Recurse -Force $rtDir }
+
 # 打包 zip
 $sourceDir = Join-Path $ProjectDir "bin\x64\Release\net8.0-windows"
 $zipName = "SMTAlert-v$version.zip"
