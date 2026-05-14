@@ -27,7 +27,8 @@
                                     <TextBlock Foreground="#FFAAAAAA" FontSize="11" Margin="0,2,0,0">
                                         <Run Text="{Binding Location, FallbackValue='-'}" />
                                         <Run Text=" | " />
-                                        <Run Text="{Binding StatusText, FallbackValue=''}" />
+                                        <Run Text="{Binding AlertRange, FallbackValue='5'}" />
+                                        <Run Text="{DynamicResource Char_Jumps}" />
                                     </TextBlock>
                                 </StackPanel>
                                 <Button Grid.Column="1" Content="{DynamicResource Main_Menu_Overlay}"
