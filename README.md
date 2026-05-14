@@ -57,6 +57,7 @@
 ![主界面](Images/main_window.png)
 ![预警雷达](Images/overlay.png)
 ![ZKB推送](Images/zkb_monitor.png)
+![预警频道监控](Images/alert_channel.png)
 ![设置](Images/settings.png)
 
 ## 许可证
