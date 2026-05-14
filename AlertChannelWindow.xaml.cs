@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using SMT.EVEData;
@@ -44,6 +45,12 @@ namespace SMTAlert
                 foreach (var item in EveManager.Instance.IntelDataList.ToList())
                     AddMessage(item);
             }
+        }
+
+        private void Header_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+                DragMove();
         }
 
         private void LoadWindowPosition()

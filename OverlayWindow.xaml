@@ -54,12 +54,11 @@
         </Button>
 
         <Button x:Name="overlay_NamesButton" Grid.Column="1" Grid.Row="0"
-                PreviewMouseDown="Overlay_ToggleNames" Opacity="0.5"
+                PreviewMouseDown="Overlay_ToggleNames" Opacity="0.7"
                 ToolTip="{DynamicResource Overlay_TipNames}" BorderThickness="0"
                 Background="Transparent" Width="20"
-                HorizontalAlignment="Left" Margin="42,0,0,0"
-                FontSize="10" FontWeight="Bold" Foreground="White"
-                Content="Abc">
+                HorizontalAlignment="Left" Margin="20,0,0,0">
+            <Image x:Name="overlay_NamesButtonImage" Source="/Images/overlay_a.png" Stretch="Fill" />
         </Button>
 
         <Button Grid.Column="2" Grid.Row="0" PreviewMouseDown="Overlay_Window_Close"

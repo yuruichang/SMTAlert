@@ -55,6 +55,7 @@
     <s:String x:Key="Settings_General_Lang">Language</s:String>
     <s:String x:Key="Settings_General_AlwaysOnTop">Always On Top</s:String>
     <s:String x:Key="Settings_General_MinimizeToTray">Minimize to Tray</s:String>
+    <s:String x:Key="Settings_General_AlertVolume">Alert Volume</s:String>
     <s:String x:Key="Settings_General_LogFolder">EVE Log Folder</s:String>
     <s:String x:Key="Settings_Alert_Channel">Alert Channel Name</s:String>
     <s:String x:Key="Settings_Alert_ClearKeywords">Clear Alert Keywords</s:String>

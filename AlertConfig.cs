@@ -139,6 +139,13 @@ namespace SMTAlert
             get => _alertClearKeywords;
             set { _alertClearKeywords = value ?? ""; OnPropertyChanged(nameof(AlertClearKeywords)); }
         }
+        // --- Alert sound volume ---
+        private float _alertVolume = 1.0f;
+        public float AlertVolume
+        {
+            get => _alertVolume;
+            set { _alertVolume = Math.Clamp(value, 0.0f, 1.0f); OnPropertyChanged(nameof(AlertVolume)); }
+        }
 
         // --- Alert timing ---
         private int _alertFreshMinutes = 5;

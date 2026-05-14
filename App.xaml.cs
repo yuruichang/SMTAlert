@@ -1,7 +1,9 @@
 using System;
+using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Markup;
 using SMT.EVEData;
 
 namespace SMTAlert
@@ -12,7 +14,7 @@ namespace SMTAlert
     public partial class App : Application
     {
         /// <summary>Current version of the application.</summary>
-        public const string AppVersion = "1.8";
+        public const string AppVersion = "1.9";
 
         /// <summary>GitHub repository path for update checks.</summary>
         public const string GitHubRepo = "yuruichang/SMTAlert";
@@ -234,10 +236,16 @@ namespace SMTAlert
                 }
             }
 
-            var newDict = new ResourceDictionary
+            // Load synchronously via XamlReader to ensure resources are available immediately
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            var filePath = Path.Combine(baseDir, "Languages", $"{langCode}.xaml");
+            ResourceDictionary newDict;
+            using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
             {
-                Source = new Uri($"Languages/{langCode}.xaml", UriKind.Relative)
-            };
+                newDict = (ResourceDictionary)XamlReader.Load(fs);
+            }
+            newDict.Source = new Uri($"Languages/{langCode}.xaml", UriKind.Relative);
+
             Current.Resources.MergedDictionaries.Add(newDict);
             if (oldDict != null)
                 Current.Resources.MergedDictionaries.Remove(oldDict);

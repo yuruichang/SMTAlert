@@ -45,6 +45,10 @@ namespace SMTAlert
             AlertStaleMinTxt.Text = cfg.AlertExpireMinutes.ToString();
 
             // EVE Log folder
+            // Alert sound volume
+
+            AlertVolumeSlider.Value = cfg.AlertVolume * 100.0;
+            AlertVolumeValue.Content = $"{(int)(cfg.AlertVolume * 100)}%";
             LogFolderTxt.Text = string.IsNullOrEmpty(cfg.EveLogFolder)
                 ? System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "EVE", "Logs")
                 : cfg.EveLogFolder;
@@ -103,6 +107,17 @@ namespace SMTAlert
         {
             if (_initializing) return;
             App.Config.MinimizeToTray = MinimizeToTrayChk.IsChecked == true;
+            App.Config.Save();
+        }
+
+        // --- Alert Volume ---
+        private void AlertVolume_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (AlertVolumeSlider == null || AlertVolumeValue == null) return;
+            int volume = (int)AlertVolumeSlider.Value;
+            AlertVolumeValue.Content = $"{volume}%";
+            if (_initializing) return;
+            App.Config.AlertVolume = volume / 100.0f;
             App.Config.Save();
         }
 

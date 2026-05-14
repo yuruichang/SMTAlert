@@ -238,29 +238,14 @@ namespace SMTAlert
                 // Pyramid hierarchy: current system at tier 0 (top), each subsequent tier = +1 jump
                 _hierarchyTiers = new List<List<string>>();
 
-                // Remove old canvas elements before rebuilding
-                foreach (var key in _systems.Keys.ToList())
-                {
-                    var oldEntry = _systems[key];
-                    if (oldEntry.Shape != null && overlay_Canvas.Children.Contains(oldEntry.Shape))
-                        overlay_Canvas.Children.Remove(oldEntry.Shape);
-                    if (oldEntry.NameLabel != null && overlay_Canvas.Children.Contains(oldEntry.NameLabel))
-                        overlay_Canvas.Children.Remove(oldEntry.NameLabel);
-                    if (oldEntry.WarningEllipse != null && overlay_Canvas.Children.Contains(oldEntry.WarningEllipse))
-                        overlay_Canvas.Children.Remove(oldEntry.WarningEllipse);
-                }
-                _systems.Clear();
+                // Preserve old entries to reuse shapes (avoids tooltip flickering)
+                var oldSystems = _systems;
+                _systems = new Dictionary<string, OverlaySystemEntry>();
 
                 // Tier 0: current system (top of pyramid)
                 _hierarchyTiers.Add(new List<string> { c.Location });
                 visited.Add(c.Location);
-                _systems[c.Location] = new OverlaySystemEntry
-                {
-                    EveSystem = currentSys,
-                    LayoutCoord = Vector2.Zero,
-                    Tier = 0,
-                    TierIndex = 0
-                };
+                _systems[c.Location] = MakeOrReuseEntry(oldSystems, c.Location, currentSys, Vector2.Zero, 0, 0);
 
                 // Build subsequent tiers by BFS — systems appear at their shallowest depth
                 for (int depth = 1; depth < _overlayDepth; depth++)
@@ -281,18 +266,27 @@ namespace SMTAlert
                                 var jumpSys = EveManager.Instance.GetEveSystem(jump);
                                 if (jumpSys != null)
                                 {
-                                    _systems[jump] = new OverlaySystemEntry
-                                    {
-                                        EveSystem = jumpSys,
-                                        LayoutCoord = Vector2.Zero,
-                                        Tier = depth,
-                                        TierIndex = currentTier.Count - 1
-                                    };
+                                    _systems[jump] = MakeOrReuseEntry(oldSystems, jump, jumpSys, Vector2.Zero, depth, currentTier.Count - 1);
                                 }
                             }
                         }
                     }
                     _hierarchyTiers.Add(currentTier);
+                }
+
+                // Remove orphan shapes (systems no longer in pyramid)
+                foreach (var kvp in oldSystems)
+                {
+                    if (!_systems.ContainsKey(kvp.Key))
+                    {
+                        var oe = kvp.Value;
+                        if (oe.Shape != null && overlay_Canvas.Children.Contains(oe.Shape))
+                            overlay_Canvas.Children.Remove(oe.Shape);
+                        if (oe.NameLabel != null && overlay_Canvas.Children.Contains(oe.NameLabel))
+                            overlay_Canvas.Children.Remove(oe.NameLabel);
+                        if (oe.WarningEllipse != null && overlay_Canvas.Children.Contains(oe.WarningEllipse))
+                            overlay_Canvas.Children.Remove(oe.WarningEllipse);
+                    }
                 }
             }
             else
@@ -373,6 +367,25 @@ namespace SMTAlert
             float x = _offsetX + _userPanX + (coord.X - _centerX) * _scaleMin * _userScale;
             float y = _offsetY + _userPanY + (coord.Y - _centerY) * _scaleMin * _userScale;
             return new Vector2(x, y);
+        }
+
+        private OverlaySystemEntry MakeOrReuseEntry(Dictionary<string, OverlaySystemEntry> old, string name, SMT.EVEData.System sys, Vector2 coord, int tier, int tierIndex)
+        {
+            if (old.TryGetValue(name, out var existing))
+            {
+                existing.EveSystem = sys;
+                existing.LayoutCoord = coord;
+                existing.Tier = tier;
+                existing.TierIndex = tierIndex;
+                return existing;
+            }
+            return new OverlaySystemEntry
+            {
+                EveSystem = sys,
+                LayoutCoord = coord,
+                Tier = tier,
+                TierIndex = tierIndex
+            };
         }
 
         private void DrawAll()
@@ -678,10 +691,8 @@ namespace SMTAlert
         {
             overlay_HunterButton.Visibility = _gathererMode ? Visibility.Collapsed : Visibility.Visible;
             overlay_GathererButton.Visibility = _gathererMode ? Visibility.Visible : Visibility.Collapsed;
-            overlay_NamesButton.Opacity = _showSystemNames ? 0.9 : 0.4;
-            overlay_NamesButton.Foreground = _showSystemNames
-                ? new SolidColorBrush(Colors.White)
-                : new SolidColorBrush(Color.FromRgb(0x88, 0x88, 0x88));
+            overlay_NamesButtonImage.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri($"pack://application:,,,/Images/overlay_{(_showSystemNames ? "aa" : "a")}.png"));
+            overlay_NamesButton.Opacity = 0.7;
         }
 
         // --- Canvas mouse events (zoom/pan) ---

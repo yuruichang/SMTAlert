@@ -52,6 +52,8 @@
     <Resource Include="Images\overlay_close.png" />
     <Resource Include="Images\overlay_gatherer.png" />
     <Resource Include="Images\overlay_hunter.png" />
+    <Resource Include="Images\overlay_aa.png" />
+    <Resource Include="Images\overlay_a.png" />
   </ItemGroup>
 
   <ItemGroup>

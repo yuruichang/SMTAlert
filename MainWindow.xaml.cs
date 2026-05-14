@@ -24,7 +24,7 @@ namespace SMTAlert
             App.AppWindow = this;
             Topmost = App.Config.AlwaysOnTop;
 
-            // Window position + intercept minimize
+            // Window position + intercept minimize + hook
             SourceInitialized += (s, e) =>
             {
                 LoadWindowPosition();
@@ -188,13 +188,6 @@ namespace SMTAlert
             _settingsWindow.ShowDialog();
         }
 
-        private void BtnAddChar_Click(object sender, RoutedEventArgs e)
-        {
-            var logonWindow = new LogonWindow { Owner = this };
-            logonWindow.ShowDialog();
-            UpdateStatus();
-        }
-
         private void BtnAlertChannel_Click(object sender, RoutedEventArgs e)
         {
             if (_alertChannelWindow != null)
@@ -245,10 +238,33 @@ namespace SMTAlert
             }
         }
 
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll", EntryPoint = "GetWindowLongPtrW")]
+        private static extern long GetWindowLongPtrW(IntPtr hWnd, int nIndex);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll", EntryPoint = "SetWindowLongPtrW")]
+        private static extern long SetWindowLongPtrW(IntPtr hWnd, int nIndex, long dwNewLong);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, uint uFlags);
+
         private IntPtr WndProcHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
             const int WM_SYSCOMMAND = 0x0112;
+            const int WM_NCLBUTTONDOWN = 0x00A1;
+            const int HTSYSMENU = 3;
+            const int HTCAPTION = 2;
             const int SC_MINIMIZE = 0xF020;
+
+            // Clicking the icon area -> treat as title bar drag
+            if (msg == WM_NCLBUTTONDOWN && wParam.ToInt64() == HTSYSMENU)
+            {
+                SendMessage(hwnd, WM_NCLBUTTONDOWN, new IntPtr(HTCAPTION), lParam);
+                handled = true;
+                return IntPtr.Zero;
+            }
 
             if (msg == WM_SYSCOMMAND && wParam.ToInt64() == SC_MINIMIZE && App.Config.MinimizeToTray)
             {
@@ -257,6 +273,29 @@ namespace SMTAlert
                 return IntPtr.Zero;
             }
             return IntPtr.Zero;
+        }
+
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+            var hwnd = new WindowInteropHelper(this).Handle;
+
+            // Remove the maximize box from the window style
+            const int GWL_STYLE = -16;
+            const long WS_MAXIMIZEBOX = 0x00010000L;
+            var style = GetWindowLongPtrW(hwnd, GWL_STYLE);
+            if ((style & WS_MAXIMIZEBOX) != 0)
+            {
+                style &= ~WS_MAXIMIZEBOX;
+                SetWindowLongPtrW(hwnd, GWL_STYLE, style);
+                // Force DWM to redraw the title bar with updated styles
+                const uint SWP_NOSIZE = 0x0001;
+                const uint SWP_NOMOVE = 0x0002;
+                const uint SWP_NOZORDER = 0x0004;
+                const uint SWP_FRAMECHANGED = 0x0020;
+                SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0,
+                    SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED);
+            }
         }
 
         // --- Window position persistence ---

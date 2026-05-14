@@ -15,9 +15,9 @@ namespace SMTAlert
 
         public static void Play()
         {
-            try
+            lock (_lock)
             {
-                lock (_lock)
+                try
                 {
                     if (_waveOut == null)
                     {
@@ -25,23 +25,24 @@ namespace SMTAlert
                         if (!File.Exists(soundPath)) return;
 
                         _audioReader = new AudioFileReader(soundPath);
-                        _waveOut = new WaveOutEvent { DeviceNumber = -1 };
-                        try
-                        {
-                            _waveOut.Init(_audioReader);
-                        }
-                        catch
-                        {
-                            // wave output fails on some devices
-                        }
+                        _waveOut = new WaveOutEvent();
+                        _waveOut.Init(_audioReader);
                     }
 
                     _waveOut.Stop();
                     _audioReader.Position = 0;
+                    _waveOut.Volume = App.Config.AlertVolume;
                     _waveOut.Play();
                 }
+                catch
+                {
+                    // If playback fails, reset so the next call reinitializes
+                    _waveOut?.Dispose();
+                    _waveOut = null;
+                    _audioReader?.Dispose();
+                    _audioReader = null;
+                }
             }
-            catch { }
         }
 
         public static void Dispose()
