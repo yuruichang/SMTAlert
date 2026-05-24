@@ -14,6 +14,7 @@
     <Window.Resources>
         <local:ZKBBackgroundConverter x:Key="zkbBGConverter" />
         <local:ZKBForegroundConverter x:Key="zkbBGFConverter" />
+        <local:ZKBFontWeightConverter x:Key="zkbFwConverter" />
         <Style x:Key="ZkbColumnHeaderStyle" TargetType="DataGridColumnHeader">
             <Setter Property="Background" Value="#FF2A2A2A" />
             <Setter Property="Foreground" Value="White" />
@@ -147,6 +148,7 @@
                 <Style TargetType="{x:Type DataGridRow}">
                     <Setter Property="Background" Value="{Binding Converter={StaticResource zkbBGConverter}}" />
                     <Setter Property="Foreground" Value="{Binding Converter={StaticResource zkbBGFConverter}}" />
+                    <Setter Property="FontWeight" Value="{Binding Converter={StaticResource zkbFwConverter}}" />
                     <Setter Property="FontSize" Value="10" />
                 </Style>
             </DataGrid.RowStyle>

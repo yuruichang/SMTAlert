@@ -132,6 +132,15 @@ namespace SMTAlert
         [XmlIgnore]
         public bool IsActiveMonitor { get; set; }
 
+        // --- Persisted: is this character being monitored? (multi-char support) ---
+        private bool _isMonitored;
+        [XmlElement]
+        public bool IsMonitored
+        {
+            get => _isMonitored;
+            set { _isMonitored = value; OnPropertyChanged(nameof(IsMonitored)); }
+        }
+
         // --- Computed warning systems ---
         [XmlIgnore]
         public List<string> WarningSystems { get; set; } = new();

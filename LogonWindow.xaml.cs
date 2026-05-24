@@ -46,7 +46,9 @@ namespace SMTAlert
                             request.Url, challengeCode);
                         if (AddedCharacter != null)
                         {
-                            App.ActiveCharacter = AddedCharacter;
+                            AddedCharacter.IsMonitored = true;
+                            if (App.ActiveCharacter == null)
+                                App.ActiveCharacter = AddedCharacter;
                         }
                     });
 

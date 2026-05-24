@@ -103,7 +103,7 @@ namespace SMTAlert
                 ? zs.VictimName
                 : "Unknown";
 
-            string link = $"<url=killReport:{zs.KillID}:{zs.Hash}>Kill: {victimName} ({zs.ShipType})</url>";
+            string link = $"<url=killReport:{zs.KillID}:{zs.Hash}:{zs.VictimCharacterID}>Kill: {victimName} ({zs.ShipType})</url>";
 
             try
             {

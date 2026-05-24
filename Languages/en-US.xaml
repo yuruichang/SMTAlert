@@ -84,6 +84,7 @@
     <s:String x:Key="Char_ActiveTag">[Active]</s:String>
     <s:String x:Key="Char_Back">← Back</s:String>
     <s:String x:Key="Char_Jumps">jumps</s:String>
+    <s:String x:Key="Char_Monitor">Enable Monitoring</s:String>
 
     <!-- Settings Footer -->
     <s:String x:Key="Settings_Version">Version</s:String>

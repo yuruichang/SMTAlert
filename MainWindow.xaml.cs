@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
 using System.Windows;
 using System.Windows.Interop;
 using SMT.EVEData;
@@ -11,11 +12,10 @@ namespace SMTAlert
     /// </summary>
     public partial class MainWindow : Window
     {
-        private OverlayWindow _overlayWindow;
+        private Dictionary<AlertCharacter, OverlayWindow> _overlayWindows = new();
         private ZKBMonitorWindow _zkbWindow;
         private SettingsWindow _settingsWindow;
         private AlertChannelWindow _alertChannelWindow;
-        private AlertCharacter _trackedCharacter;
         private System.Windows.Forms.NotifyIcon _notifyIcon;
 
         public MainWindow()
@@ -39,6 +39,8 @@ namespace SMTAlert
             // Character change updates
             App.CharacterMgr.CharactersChanged += OnCharactersChanged;
             App.Config.PropertyChanged += OnConfigChanged;
+            foreach (var c in App.CharacterMgr.Characters)
+                c.PropertyChanged += OnCharPropertyChanged;
             OnCharactersChanged();
 
             // Restore previously open windows
@@ -93,57 +95,40 @@ namespace SMTAlert
                 Dispatcher.Invoke(() => Topmost = App.Config.AlwaysOnTop);
         }
 
+        private void OnCharPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(AlertCharacter.Location) ||
+                e.PropertyName == nameof(AlertCharacter.IsOnline) ||
+                e.PropertyName == nameof(AlertCharacter.AlertEnabled) ||
+                e.PropertyName == nameof(AlertCharacter.AlertRange) ||
+                e.PropertyName == nameof(AlertCharacter.IsMonitored))
+            {
+                Dispatcher.Invoke(() => RefreshMonitoredList());
+            }
+        }
+
         private void OnCharactersChanged()
         {
-            // Unsubscribe from old character
-            if (_trackedCharacter != null)
-                _trackedCharacter.PropertyChanged -= OnActiveCharacterPropertyChanged;
-
-            _trackedCharacter = App.ActiveCharacter;
-
-            // Subscribe to new character's property changes
-            if (_trackedCharacter != null)
-                _trackedCharacter.PropertyChanged += OnActiveCharacterPropertyChanged;
-
-            UpdateStatus();
+            RefreshMonitoredList();
         }
 
-        private void OnActiveCharacterPropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void RefreshMonitoredList()
         {
-            // Refresh UI when alert settings change
-            if (e.PropertyName == nameof(AlertCharacter.AlertRange) ||
-                e.PropertyName == nameof(AlertCharacter.AlertEnabled) ||
-                e.PropertyName == nameof(AlertCharacter.Location) ||
-                e.PropertyName == nameof(AlertCharacter.IsOnline))
-            {
-                Dispatcher.Invoke(() => UpdateStatus());
-            }
-        }
-
-        private void UpdateStatus()
-        {
-            var c = App.ActiveCharacter;
-            if (c != null && !string.IsNullOrEmpty(c.Location))
-            {
-                bool zh = EveManager.CurrentLanguage == "zh-CN";
-                StatusText.Text = $"{c.Name} @ {c.Location}\n" +
-                    $"{(zh ? "联盟" : "Alliance")}: {c.AllianceTicker} | " +
-                    $"{(zh ? "预警范围" : "Alert Range")}: {c.AlertRange}{(zh ? "跳" : "j")} | " +
-                    $"{(c.AlertEnabled ? (zh ? "已启用" : "Enabled") : (zh ? "已禁用" : "Disabled"))}";
-            }
-            else
-            {
-                StatusText.Text = (string)TryFindResource("Main_NoChar");
-            }
+            var monitored = App.CharacterMgr.Characters.Where(c => c.IsMonitored).ToList();
+            CharItems.ItemsSource = monitored;
+            StatusText.Visibility = monitored.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
             UpdateTitle();
         }
 
         public void UpdateTitle()
         {
-            var c = App.ActiveCharacter;
-            Title = c != null && !string.IsNullOrEmpty(c.Name)
-                ? $"SMT Alert - {c.Name}"
-                : "SMT Alert";
+            var monitored = App.CharacterMgr.Characters.Where(c => c.IsMonitored).ToList();
+            if (monitored.Count > 1)
+                Title = $"SMT Alert - {monitored.Count} {(EveManager.CurrentLanguage == "zh-CN" ? "个角色" : "chars")}";
+            else if (monitored.Count == 1)
+                Title = $"SMT Alert - {monitored[0].Name}";
+            else
+                Title = "SMT Alert";
 
             if (_notifyIcon != null)
                 _notifyIcon.Text = Title;
@@ -152,15 +137,24 @@ namespace SMTAlert
         // --- Button handlers ---
         private void BtnOverlay_Click(object sender, RoutedEventArgs e)
         {
-            if (_overlayWindow != null)
+            var c = (AlertCharacter)((System.Windows.Controls.Button)sender).Tag;
+            if (c == null) return;
+
+            if (_overlayWindows.TryGetValue(c, out var existing) && existing != null)
             {
-                _overlayWindow.Close();
-                _overlayWindow = null;
+                existing.Close();
+                _overlayWindows.Remove(c);
                 return;
             }
-            _overlayWindow = new OverlayWindow { Owner = this };
-            _overlayWindow.Closed += (s, a) => _overlayWindow = null;
-            _overlayWindow.Show();
+
+            var overlay = new OverlayWindow(c) { Owner = this };
+            overlay.Closed += (s, a) =>
+            {
+                if (c != null)
+                    _overlayWindows.Remove(c);
+            };
+            _overlayWindows[c] = overlay;
+            overlay.Show();
         }
 
         private void BtnZKB_Click(object sender, RoutedEventArgs e)
@@ -208,7 +202,9 @@ namespace SMTAlert
             // Save window states
             SaveWindowStates();
 
-            _overlayWindow?.Close();
+            foreach (var ov in _overlayWindows.Values.ToList())
+                ov?.Close();
+            _overlayWindows.Clear();
             _zkbWindow?.Close();
             _alertChannelWindow?.Close();
             EveManager.Instance?.ShutDown();
@@ -228,9 +224,11 @@ namespace SMTAlert
             if (App.Config.MinimizeToTray && WindowState == WindowState.Minimized)
             {
                 Hide();
-                // Restore owned float windows in case they were minimized alongside
-                if (_overlayWindow != null && _overlayWindow.WindowState == WindowState.Minimized)
-                    _overlayWindow.WindowState = WindowState.Normal;
+                foreach (var ov in _overlayWindows.Values)
+                {
+                    if (ov != null && ov.WindowState == WindowState.Minimized)
+                        ov.WindowState = WindowState.Normal;
+                }
                 if (_zkbWindow != null && _zkbWindow.WindowState == WindowState.Minimized)
                     _zkbWindow.WindowState = WindowState.Normal;
                 if (_alertChannelWindow != null && _alertChannelWindow.WindowState == WindowState.Minimized)
@@ -258,7 +256,6 @@ namespace SMTAlert
             const int HTCAPTION = 2;
             const int SC_MINIMIZE = 0xF020;
 
-            // Clicking the icon area -> treat as title bar drag
             if (msg == WM_NCLBUTTONDOWN && wParam.ToInt64() == HTSYSMENU)
             {
                 SendMessage(hwnd, WM_NCLBUTTONDOWN, new IntPtr(HTCAPTION), lParam);
@@ -280,7 +277,6 @@ namespace SMTAlert
             base.OnSourceInitialized(e);
             var hwnd = new WindowInteropHelper(this).Handle;
 
-            // Remove the maximize box from the window style
             const int GWL_STYLE = -16;
             const long WS_MAXIMIZEBOX = 0x00010000L;
             var style = GetWindowLongPtrW(hwnd, GWL_STYLE);
@@ -288,7 +284,6 @@ namespace SMTAlert
             {
                 style &= ~WS_MAXIMIZEBOX;
                 SetWindowLongPtrW(hwnd, GWL_STYLE, style);
-                // Force DWM to redraw the title bar with updated styles
                 const uint SWP_NOSIZE = 0x0001;
                 const uint SWP_NOMOVE = 0x0002;
                 const uint SWP_NOZORDER = 0x0004;
@@ -318,7 +313,7 @@ namespace SMTAlert
         private void SaveWindowStates()
         {
             var s = Properties.Settings.Default;
-            s.OverlayWindow_Open = _overlayWindow != null;
+            s.OverlayWindow_Open = _overlayWindows.Count > 0;
             s.ZKBMonitorWindow_Open = _zkbWindow != null;
             s.AlertChannelWindow_Open = _alertChannelWindow != null;
             s.MainWindow_MinimizedToTray = WindowState == WindowState.Minimized || !IsVisible;
@@ -333,13 +328,6 @@ namespace SMTAlert
             {
                 WindowState = WindowState.Minimized;
                 Hide();
-            }
-
-            if (s.OverlayWindow_Open)
-            {
-                _overlayWindow = new OverlayWindow { Owner = this };
-                _overlayWindow.Closed += (snd, a) => _overlayWindow = null;
-                _overlayWindow.Show();
             }
 
             if (s.ZKBMonitorWindow_Open)

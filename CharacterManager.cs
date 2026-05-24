@@ -236,27 +236,30 @@ namespace SMTAlert
             var newest = items.FirstOrDefault();
             if (newest == null) return;
 
-            var c = App.ActiveCharacter;
-            if (c == null || !c.AlertEnabled || !c.IsOnline || string.IsNullOrEmpty(c.Location))
-                return;
-
-            // Get all systems within alert range
-            var systemsInRange = Navigation.GetSystemsXJumpsFrom(
-                new List<string>(), c.Location, c.AlertRange);
-
-            // Check if any intel system is within range, new to us, and NOT a clear notification
             bool shouldAlert = false;
-            if (!newest.ClearNotification)
+
+            foreach (var c in Characters.Where(c => c.IsMonitored))
             {
-                foreach (var sysName in newest.Systems)
+                if (!c.AlertEnabled || !c.IsOnline || string.IsNullOrEmpty(c.Location))
+                    continue;
+
+                // Get all systems within alert range for this character
+                var systemsInRange = Navigation.GetSystemsXJumpsFrom(
+                    new List<string>(), c.Location, c.AlertRange);
+
+                // Check if any intel system is within range, new to us, and NOT a clear notification
+                if (!newest.ClearNotification)
                 {
-                    // Debounce: only re-alert the same system after 30 seconds
-                    if (systemsInRange.Contains(sysName) &&
-                        (!_recentAlertedSystems.TryGetValue(sysName, out DateTime lastAlert) ||
-                         (DateTime.UtcNow - lastAlert).TotalSeconds > 30))
+                    foreach (var sysName in newest.Systems)
                     {
-                        _recentAlertedSystems[sysName] = DateTime.UtcNow;
-                        shouldAlert = true;
+                        // Debounce: only re-alert the same system after 30 seconds
+                        if (systemsInRange.Contains(sysName) &&
+                            (!_recentAlertedSystems.TryGetValue(sysName, out DateTime lastAlert) ||
+                             (DateTime.UtcNow - lastAlert).TotalSeconds > 30))
+                        {
+                            _recentAlertedSystems[sysName] = DateTime.UtcNow;
+                            shouldAlert = true;
+                        }
                     }
                 }
             }

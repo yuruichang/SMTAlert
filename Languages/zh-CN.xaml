@@ -84,6 +84,7 @@
     <s:String x:Key="Char_ActiveTag">[活跃]</s:String>
     <s:String x:Key="Char_Back">← 返回</s:String>
     <s:String x:Key="Char_Jumps">跳</s:String>
+    <s:String x:Key="Char_Monitor">启用监控</s:String>
 
     <!-- Settings Footer -->
     <s:String x:Key="Settings_Version">版本</s:String>

@@ -291,8 +291,6 @@ namespace SMTAlert
                     MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result == MessageBoxResult.Yes)
                 {
-                    if (App.ActiveCharacter == c)
-                        App.ActiveCharacter = App.CharacterMgr.Characters.FirstOrDefault(x => x != c);
                     App.CharacterMgr.RemoveCharacter(c);
                     CharacterListBox.Items.Refresh();
                 }
@@ -309,7 +307,7 @@ namespace SMTAlert
                 AlertRangeSlider.Value = c.AlertRange;
                 AlertRangeValue.Content = $"{c.AlertRange} {(string)TryFindResource("Char_Jumps")}";
                 AlertEnabledChk.IsChecked = c.AlertEnabled;
-                IsActiveMonitorChk.IsChecked = c == App.ActiveCharacter;
+                IsMonitoredChk.IsChecked = c.IsMonitored;
             }
             else
             {
@@ -325,15 +323,12 @@ namespace SMTAlert
             CharListGrid.Visibility = Visibility.Visible;
         }
 
-        private void IsActiveMonitor_Checked(object sender, RoutedEventArgs e)
+        private void IsMonitored_Checked(object sender, RoutedEventArgs e)
         {
             if (_initializing) return;
             if (CharacterListBox.SelectedItem is AlertCharacter c)
             {
-                if (App.ActiveCharacter != null)
-                    App.ActiveCharacter.IsActiveMonitor = false;
-                App.ActiveCharacter = c;
-                c.IsActiveMonitor = true;
+                c.IsMonitored = true;
                 App.CharacterMgr.SaveCharacters();
                 CharacterListBox.Items.Refresh();
                 if (App.AppWindow != null)
@@ -341,13 +336,13 @@ namespace SMTAlert
             }
         }
 
-        private void IsActiveMonitor_Unchecked(object sender, RoutedEventArgs e)
+        private void IsMonitored_Unchecked(object sender, RoutedEventArgs e)
         {
             if (_initializing) return;
-            if (CharacterListBox.SelectedItem is AlertCharacter c && c == App.ActiveCharacter)
+            if (CharacterListBox.SelectedItem is AlertCharacter c)
             {
-                c.IsActiveMonitor = false;
-                App.ActiveCharacter = null;
+                c.IsMonitored = false;
+                App.CharacterMgr.SaveCharacters();
                 CharacterListBox.Items.Refresh();
                 if (App.AppWindow != null)
                     App.AppWindow.UpdateTitle();

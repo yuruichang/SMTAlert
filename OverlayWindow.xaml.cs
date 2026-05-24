@@ -28,6 +28,7 @@ namespace SMTAlert
         private Brush _outOfRegionFillBrush;
 
         // --- State ---
+        private AlertCharacter _character;
         private Dictionary<string, OverlaySystemEntry> _systems = new();
         private List<List<string>> _hierarchyTiers = new();
         private List<Line> _jumpLines = new();
@@ -66,9 +67,13 @@ namespace SMTAlert
         private float _panStartPanX;
         private float _panStartPanY;
 
-        public OverlayWindow()
+        public OverlayWindow(AlertCharacter character)
         {
+            _character = character;
+
             InitializeComponent();
+
+            Title = $"SMT Radar - {_character.Name}";
 
             _sysOutlineBrush = new SolidColorBrush(Colors.DarkGray);
             _sysLocationBrush = new SolidColorBrush(Colors.Orange);
@@ -154,7 +159,7 @@ namespace SMTAlert
 
         private void CheckPositionChange()
         {
-            var c = App.ActiveCharacter;
+            var c = _character;
             var newLoc = c?.Location ?? "";
             var newReg = c?.Region ?? "";
 
@@ -169,7 +174,7 @@ namespace SMTAlert
 
         private void UpdateCharDisplay()
         {
-            var c = App.ActiveCharacter;
+            var c = _character;
             if (c != null && !string.IsNullOrEmpty(c.Location))
             {
                 overlay_CharNameTextblock.Text = $"{c.Name} @ {c.Location}";
@@ -190,13 +195,13 @@ namespace SMTAlert
         {
             UpdateCharDisplay();
 
-            if (App.ActiveCharacter == null || string.IsNullOrEmpty(App.ActiveCharacter.Location))
+            if (_character == null || string.IsNullOrEmpty(_character.Location))
             {
                 ClearView();
                 return;
             }
 
-            _overlayDepth = App.ActiveCharacter.AlertRange + 1;
+            _overlayDepth = _character.AlertRange + 1;
             CollectSystems();
             DrawAll();
         }
@@ -222,7 +227,7 @@ namespace SMTAlert
 
         private void CollectSystems()
         {
-            var c = App.ActiveCharacter;
+            var c = _character;
             var currentSys = EveManager.Instance.GetEveSystem(c.Location);
             if (currentSys == null) { ClearView(); return; }
 
@@ -390,7 +395,7 @@ namespace SMTAlert
 
         private void DrawAll()
         {
-            var c = App.ActiveCharacter;
+            var c = _character;
             var warningSet = new HashSet<string>();
             var clearSet = new HashSet<string>();
             var staleSet = new HashSet<string>();
@@ -683,7 +688,7 @@ namespace SMTAlert
         private float GetSystemSize(string sysName)
         {
             if (_gathererMode) return SystemSizeGatherer;
-            if (sysName == App.ActiveCharacter?.Location) return SystemSizeHunter * CurrentSystemSizeMod;
+            if (sysName == _character?.Location) return SystemSizeHunter * CurrentSystemSizeMod;
             return SystemSizeHunter;
         }
 
@@ -798,11 +803,12 @@ namespace SMTAlert
             RefreshView();
         }
 
-        // --- Window position persistence ---
+        // --- Window position persistence (per character) ---
+        private static Dictionary<string, string> _savedOverlayPlacements = new();
+
         private void LoadWindowPosition()
         {
-            string placement = Properties.Settings.Default.OverlayWindow_placement;
-            if (!string.IsNullOrEmpty(placement))
+            if (_character != null && _savedOverlayPlacements.TryGetValue(_character.Name, out string placement))
             {
                 WindowPlacement.SetPlacement(new WindowInteropHelper(this).Handle, placement);
             }
@@ -810,9 +816,11 @@ namespace SMTAlert
 
         private void StoreWindowPosition()
         {
-            Properties.Settings.Default.OverlayWindow_placement =
-                WindowPlacement.GetPlacement(new WindowInteropHelper(this).Handle);
-            Properties.Settings.Default.Save();
+            if (_character != null)
+            {
+                _savedOverlayPlacements[_character.Name] =
+                    WindowPlacement.GetPlacement(new WindowInteropHelper(this).Handle);
+            }
         }
 
         protected override void OnClosed(EventArgs e)

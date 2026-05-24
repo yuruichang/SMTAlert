@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows;
@@ -79,9 +80,10 @@ namespace SMTAlert
             CharacterMgr.Initialize();
             CharacterMgr.CharactersChanged += OnCharactersChanged;
 
-            // Set active character (first one if available)
+            // Set active character (first one if available) and auto-monitor
             if (CharacterMgr.Characters.Count > 0)
             {
+                CharacterMgr.Characters[0].IsMonitored = true;
                 ActiveCharacter = CharacterMgr.Characters[0];
                 ActiveCharacter.IsActiveMonitor = true;
             }
@@ -206,8 +208,15 @@ namespace SMTAlert
         {
             if (ActiveCharacter == null && CharacterMgr.Characters.Count > 0)
             {
+                CharacterMgr.Characters[0].IsMonitored = true;
                 ActiveCharacter = CharacterMgr.Characters[0];
                 ActiveCharacter.IsActiveMonitor = true;
+            }
+
+            // Ensure at least one character is monitored
+            if (CharacterMgr.Characters.Count > 0 && !CharacterMgr.Characters.Any(c => c.IsMonitored))
+            {
+                CharacterMgr.Characters[0].IsMonitored = true;
             }
         }
 

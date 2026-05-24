@@ -5,25 +5,57 @@
         WindowStartupLocation="CenterScreen" Background="#FF232223"
         Closing="Window_Closing" StateChanged="Window_StateChanged">
     <Grid Background="#FF232223">
-        <StackPanel Orientation="Vertical" Margin="6" VerticalAlignment="Center">
+        <StackPanel Orientation="Vertical" Margin="8" VerticalAlignment="Center"
+                    MinWidth="320" MaxWidth="500">
             <TextBlock Text="{DynamicResource App_Title}" FontSize="20" FontWeight="Bold"
-                       Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,10" />
+                       Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,12" />
 
+            <!-- Monitored characters list -->
+            <ItemsControl x:Name="CharItems" Margin="0,0,0,8">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="#FF333333" CornerRadius="4" Padding="8"
+                                Margin="0,0,0,6" BorderBrush="#FF444444" BorderThickness="1">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                        <TextBlock FontWeight="Bold" Text="{Binding Name}"
+                                                   Foreground="White" FontSize="14" />
+                                    <TextBlock Foreground="#FFAAAAAA" FontSize="11" Margin="0,2,0,0">
+                                        <Run Text="{Binding Location, FallbackValue='-'}" />
+                                        <Run Text=" | " />
+                                        <Run Text="{Binding AlertRange, FallbackValue='5'}" />
+                                        <Run Text="{DynamicResource Char_Jumps}" />
+                                    </TextBlock>
+                                </StackPanel>
+                                <Button Grid.Column="1" Content="{DynamicResource Main_Menu_Overlay}"
+                                        Width="80" Height="32" FontSize="13" Margin="8,0,0,0"
+                                        VerticalAlignment="Center"
+                                        Tag="{Binding}" Click="BtnOverlay_Click" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Fallback when no monitored characters -->
             <TextBlock x:Name="StatusText" Text="{DynamicResource Main_NoChar}"
                        Foreground="White" TextWrapping="Wrap" HorizontalAlignment="Center"
-                       Margin="0,0,0,10" FontSize="12" />
+                       Margin="0,0,0,10" FontSize="12" Visibility="Collapsed" />
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button x:Name="BtnOverlay" Content="{DynamicResource Main_Menu_Overlay}"
-                        Click="BtnOverlay_Click" Width="120" Height="38" Margin="5" FontSize="15" />
+            <!-- Global buttons -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
                 <Button x:Name="BtnZKB" Content="{DynamicResource Main_Menu_ZKB}"
-                        Click="BtnZKB_Click" Width="120" Height="38" Margin="5" FontSize="15" />
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,3,0,0">
+                        Click="BtnZKB_Click" Width="120" Height="38" Margin="4" FontSize="15" />
                 <Button x:Name="BtnAlertChannel" Content="{DynamicResource Main_Menu_AlertChannel}"
-                        Click="BtnAlertChannel_Click" Width="120" Height="38" Margin="5" FontSize="15" />
+                        Click="BtnAlertChannel_Click" Width="120" Height="38" Margin="4" FontSize="15" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,2,0,0">
                 <Button x:Name="BtnSettings" Content="{DynamicResource Main_Menu_Settings}"
-                        Click="BtnSettings_Click" Width="120" Height="38" Margin="5" FontSize="15" />
+                        Click="BtnSettings_Click" Width="120" Height="38" Margin="4" FontSize="15" />
             </StackPanel>
         </StackPanel>
     </Grid>

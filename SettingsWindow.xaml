@@ -185,8 +185,8 @@
                                     <StackPanel Orientation="Vertical" Margin="5">
                                         <StackPanel Orientation="Horizontal">
                                             <TextBlock FontWeight="Bold" Text="{Binding Name}" Foreground="White" />
-                                            <TextBlock Text="{DynamicResource Char_ActiveTag}" Foreground="#FF5588FF"
-                                                       Visibility="{Binding IsActiveMonitor, Converter={StaticResource BoolToVis}}" />
+                                            <TextBlock Text="[M]" Foreground="#FF5588FF"
+                                                       Visibility="{Binding IsMonitored, Converter={StaticResource BoolToVis}}" />
                                         </StackPanel>
                                         <TextBlock Foreground="Gray" Text="{Binding StatusText}" />
                                     </StackPanel>
@@ -209,8 +209,8 @@
                                 <Label x:Name="AlertRangeValue" Foreground="White" />
                                 <CheckBox x:Name="AlertEnabledChk" Content="{DynamicResource Char_AlertEnabled}"
                                           Foreground="White" Margin="0,10" Checked="AlertEnabled_Changed" Unchecked="AlertEnabled_Changed" />
-                                <CheckBox x:Name="IsActiveMonitorChk" Content="{DynamicResource Char_SetActive}"
-                                          Foreground="White" Margin="0,10,0,0" Checked="IsActiveMonitor_Checked" Unchecked="IsActiveMonitor_Unchecked" />
+                                <CheckBox x:Name="IsMonitoredChk" Content="{DynamicResource Char_Monitor}"
+                                          Foreground="White" Margin="0,10,0,0" Checked="IsMonitored_Checked" Unchecked="IsMonitored_Unchecked" />
                             </StackPanel>
                         </StackPanel>
                     </Border>
