@@ -99,11 +99,15 @@ namespace SMTAlert
             var zs = ZKBKillList.SelectedItem as SMT.EVEData.ZKillRedisQ.ZKBDataSimple;
             if (zs == null || string.IsNullOrEmpty(zs.Hash)) return;
 
-            string victimName = !string.IsNullOrEmpty(zs.VictimName)
-                ? zs.VictimName
-                : "Unknown";
+            // Re-check name from cache — may have been resolved since the kill arrived
+            string victimName = zs.VictimName;
+            if (string.IsNullOrEmpty(victimName) && zs.VictimCharacterID != 0)
+                victimName = EveManager.Instance.GetCharacterName(zs.VictimCharacterID);
 
-            string link = $"<url=killReport:{zs.KillID}:{zs.Hash}:{zs.VictimCharacterID}>Kill: {victimName} ({zs.ShipType})</url>";
+            if (string.IsNullOrEmpty(victimName))
+                victimName = "Unknown";
+
+            string link = $"<url=killReport:{zs.KillID}:{zs.Hash}>Kill: {victimName} ({zs.ShipType})</url>";
 
             try
             {
