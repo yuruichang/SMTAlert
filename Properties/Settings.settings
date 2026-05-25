@@ -17,6 +17,9 @@
     <Setting Name="OverlayWindow_Open" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="OverlayWindow_CharacterName" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
     <Setting Name="ZKBMonitorWindow_Open" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>

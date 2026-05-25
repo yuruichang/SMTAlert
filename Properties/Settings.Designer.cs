@@ -58,6 +58,15 @@ namespace SMTAlert.Properties
 
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string OverlayWindow_CharacterName
+        {
+            get { return ((string)(this["OverlayWindow_CharacterName"])); }
+            set { this["OverlayWindow_CharacterName"] = value; }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool ZKBMonitorWindow_Open
         {
