@@ -15,7 +15,7 @@ namespace SMTAlert
     public partial class App : Application
     {
         /// <summary>Current version of the application.</summary>
-        public const string AppVersion = "1.9";
+        public const string AppVersion = "2.0";
 
         /// <summary>GitHub repository path for update checks.</summary>
         public const string GitHubRepo = "yuruichang/SMTAlert";
