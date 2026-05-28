@@ -1,7 +1,7 @@
 ﻿<Window x:Class="SMTAlert.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="{DynamicResource Settings_Title}" Height="450" Width="500"
+        Title="{DynamicResource Settings_Title}" Width="500" Height="750"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
         Background="#FF232223">
     <Grid Background="#FF232223" Margin="10">
@@ -9,7 +9,7 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <TabControl Background="Transparent">
+        <TabControl x:Name="SettingsTabControl" Background="Transparent">
             <TabControl.Resources>
                 <BooleanToVisibilityConverter x:Key="BoolToVis" />
                 <Style TargetType="TabItem">
@@ -160,8 +160,120 @@
                         <TextBox x:Name="ZkbCustomSystemsTxt" Width="240" TextChanged="ZkbCustomSystems_Changed"
                                  ToolTip="{DynamicResource Settings_ZKB_CustomSystemsTip}" />
                     </StackPanel>
+                    <Label Content="{DynamicResource Settings_ZKB_MonitoredChars}" Foreground="White" Margin="0,8,0,0" FontWeight="Bold" />
+                    <StackPanel Orientation="Horizontal" Margin="0,5">
+                        <Label Content="{DynamicResource Settings_ZKB_MonitoredCharIDs}" Width="160" Foreground="White" />
+                        <TextBox x:Name="ZkbMonitoredCharIDsTxt" Width="240" TextChanged="ZkbMonitoredCharIDs_Changed"
+                                 ToolTip="{DynamicResource Settings_ZKB_MonitoredCharIDsTip}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,5">
+                        <Label Content="{DynamicResource Settings_ZKB_MonitoredCorpIDs}" Width="160" Foreground="White" />
+                        <TextBox x:Name="ZkbMonitoredCorpIDsTxt" Width="240" TextChanged="ZkbMonitoredCorpIDs_Changed"
+                                 ToolTip="{DynamicResource Settings_ZKB_MonitoredCorpIDsTip}" />
+                    </StackPanel>
+                    <CheckBox x:Name="ZkbUseLocalTimeChk" Content="{DynamicResource Settings_ZKB_UseLocalTime}"
+                              Foreground="White" Margin="0,5" Checked="ZkbUseLocalTime_Changed" Unchecked="ZkbUseLocalTime_Changed" />
+                    <StackPanel Orientation="Horizontal" Margin="0,5">
+                        <Label Content="{DynamicResource Settings_ZKB_FontSize}" Width="160" Foreground="White" />
+                        <Slider x:Name="ZkbFontSizeSlider" Minimum="8" Maximum="24" TickFrequency="1" IsSnapToTickEnabled="True"
+                                Width="160" ValueChanged="ZkbFontSize_Changed" />
+                        <TextBlock x:Name="ZkbFontSizeLabel" Text="10" Foreground="White" Margin="8,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <Label Content="{DynamicResource Settings_ZKB_Columns}" Foreground="White" Margin="0,8,0,0" FontWeight="Bold" />
+                    <StackPanel Margin="10,5,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="0,1">
+                            <Button x:Name="ZkbColTimeUp" Content="↑" Width="22" Height="20" FontSize="10" Padding="0"
+                                    Background="#FF444444" Foreground="White" BorderThickness="0"
+                                    Click="ZkbColumn_MoveUp" Tag="Time" />
+                            <Button x:Name="ZkbColTimeDown" Content="↓" Width="22" Height="20" FontSize="10" Padding="0" Margin="2,0"
+                                    Background="#FF444444" Foreground="White" BorderThickness="0"
+                                    Click="ZkbColumn_MoveDown" Tag="Time" />
+                            <CheckBox x:Name="ZkbColTimeChk" Content="{DynamicResource ZKB_Column_Time}" Foreground="White"
+                                      Margin="4,0,0,0" Checked="ZkbColumn_Changed" Unchecked="ZkbColumn_Changed" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,1">
+                            <Button x:Name="ZkbColRegionUp" Content="↑" Width="22" Height="20" FontSize="10" Padding="0"
+                                    Background="#FF444444" Foreground="White" BorderThickness="0"
+                                    Click="ZkbColumn_MoveUp" Tag="Region" />
+                            <Button x:Name="ZkbColRegionDown" Content="↓" Width="22" Height="20" FontSize="10" Padding="0" Margin="2,0"
+                                    Background="#FF444444" Foreground="White" BorderThickness="0"
+                                    Click="ZkbColumn_MoveDown" Tag="Region" />
+                            <CheckBox x:Name="ZkbColRegionChk" Content="{DynamicResource ZKB_Column_Region}" Foreground="White"
+                                      Margin="4,0,0,0" Checked="ZkbColumn_Changed" Unchecked="ZkbColumn_Changed" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,1">
+                            <Button x:Name="ZkbColSystemUp" Content="↑" Width="22" Height="20" FontSize="10" Padding="0"
+                                    Background="#FF444444" Foreground="White" BorderThickness="0"
+                                    Click="ZkbColumn_MoveUp" Tag="System" />
+                            <Button x:Name="ZkbColSystemDown" Content="↓" Width="22" Height="20" FontSize="10" Padding="0" Margin="2,0"
+                                    Background="#FF444444" Foreground="White" BorderThickness="0"
+                                    Click="ZkbColumn_MoveDown" Tag="System" />
+                            <CheckBox x:Name="ZkbColSystemChk" Content="{DynamicResource ZKB_Column_System}" Foreground="White"
+                                      Margin="4,0,0,0" Checked="ZkbColumn_Changed" Unchecked="ZkbColumn_Changed" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,1">
+                            <Button x:Name="ZkbColAllianceUp" Content="↑" Width="22" Height="20" FontSize="10" Padding="0"
+                                    Background="#FF444444" Foreground="White" BorderThickness="0"
+                                    Click="ZkbColumn_MoveUp" Tag="Alliance" />
+                            <Button x:Name="ZkbColAllianceDown" Content="↓" Width="22" Height="20" FontSize="10" Padding="0" Margin="2,0"
+                                    Background="#FF444444" Foreground="White" BorderThickness="0"
+                                    Click="ZkbColumn_MoveDown" Tag="Alliance" />
+                            <CheckBox x:Name="ZkbColAllianceChk" Content="{DynamicResource ZKB_Column_Alliance}" Foreground="White"
+                                      Margin="4,0,0,0" Checked="ZkbColumn_Changed" Unchecked="ZkbColumn_Changed" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,1">
+                            <Button x:Name="ZkbColCorpUp" Content="↑" Width="22" Height="20" FontSize="10" Padding="0"
+                                    Background="#FF444444" Foreground="White" BorderThickness="0"
+                                    Click="ZkbColumn_MoveUp" Tag="Corp" />
+                            <Button x:Name="ZkbColCorpDown" Content="↓" Width="22" Height="20" FontSize="10" Padding="0" Margin="2,0"
+                                    Background="#FF444444" Foreground="White" BorderThickness="0"
+                                    Click="ZkbColumn_MoveDown" Tag="Corp" />
+                            <CheckBox x:Name="ZkbColCorpChk" Content="{DynamicResource ZKB_Column_Corp}" Foreground="White"
+                                      Margin="4,0,0,0" Checked="ZkbColumn_Changed" Unchecked="ZkbColumn_Changed" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,1">
+                            <Button x:Name="ZkbColCharacterIDUp" Content="↑" Width="22" Height="20" FontSize="10" Padding="0"
+                                    Background="#FF444444" Foreground="White" BorderThickness="0"
+                                    Click="ZkbColumn_MoveUp" Tag="CharacterID" />
+                            <Button x:Name="ZkbColCharacterIDDown" Content="↓" Width="22" Height="20" FontSize="10" Padding="0" Margin="2,0"
+                                    Background="#FF444444" Foreground="White" BorderThickness="0"
+                                    Click="ZkbColumn_MoveDown" Tag="CharacterID" />
+                            <CheckBox x:Name="ZkbColCharacterIDChk" Content="{DynamicResource ZKB_Column_CharacterID}" Foreground="White"
+                                      Margin="4,0,0,0" Checked="ZkbColumn_Changed" Unchecked="ZkbColumn_Changed" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,1">
+                            <Button x:Name="ZkbColAttackerAllianceUp" Content="↑" Width="22" Height="20" FontSize="10" Padding="0"
+                                    Background="#FF444444" Foreground="White" BorderThickness="0"
+                                    Click="ZkbColumn_MoveUp" Tag="AttackerAlliance" />
+                            <Button x:Name="ZkbColAttackerAllianceDown" Content="↓" Width="22" Height="20" FontSize="10" Padding="0" Margin="2,0"
+                                    Background="#FF444444" Foreground="White" BorderThickness="0"
+                                    Click="ZkbColumn_MoveDown" Tag="AttackerAlliance" />
+                            <CheckBox x:Name="ZkbColAttackerAllianceChk" Content="{DynamicResource ZKB_Column_AttackerAlliance}" Foreground="White"
+                                      Margin="4,0,0,0" Checked="ZkbColumn_Changed" Unchecked="ZkbColumn_Changed" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,1">
+                            <Button x:Name="ZkbColShipTypeUp" Content="↑" Width="22" Height="20" FontSize="10" Padding="0"
+                                    Background="#FF444444" Foreground="White" BorderThickness="0"
+                                    Click="ZkbColumn_MoveUp" Tag="ShipType" />
+                            <Button x:Name="ZkbColShipTypeDown" Content="↓" Width="22" Height="20" FontSize="10" Padding="0" Margin="2,0"
+                                    Background="#FF444444" Foreground="White" BorderThickness="0"
+                                    Click="ZkbColumn_MoveDown" Tag="ShipType" />
+                            <CheckBox x:Name="ZkbColShipTypeChk" Content="{DynamicResource ZKB_Column_ShipType}" Foreground="White"
+                                      Margin="4,0,0,0" Checked="ZkbColumn_Changed" Unchecked="ZkbColumn_Changed" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,1">
+                            <Button x:Name="ZkbColValueUp" Content="↑" Width="22" Height="20" FontSize="10" Padding="0"
+                                    Background="#FF444444" Foreground="White" BorderThickness="0"
+                                    Click="ZkbColumn_MoveUp" Tag="Value" />
+                            <Button x:Name="ZkbColValueDown" Content="↓" Width="22" Height="20" FontSize="10" Padding="0" Margin="2,0"
+                                    Background="#FF444444" Foreground="White" BorderThickness="0"
+                                    Click="ZkbColumn_MoveDown" Tag="Value" />
+                            <CheckBox x:Name="ZkbColValueChk" Content="{DynamicResource ZKB_Column_Value}" Foreground="White"
+                                      Margin="4,0,0,0" Checked="ZkbColumn_Changed" Unchecked="ZkbColumn_Changed" />
+                        </StackPanel>
+                    </StackPanel>
                 </StackPanel>
-            </TabItem>
+        </TabItem>
 
             <!-- Character Alert Settings Tab -->
             <TabItem Header="{DynamicResource Settings_Tab_Characters}">

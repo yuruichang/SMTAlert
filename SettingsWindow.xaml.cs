@@ -71,6 +71,40 @@ namespace SMTAlert
             ZkbExpireTxt.Text = cfg.ZkbExpireMinutes.ToString();
             ZkbFilterRegionChk.IsChecked = cfg.ZkbFilterByWarningRegion;
             ZkbCustomSystemsTxt.Text = cfg.ZkbCustomSystems;
+            ZkbMonitoredCharIDsTxt.Text = cfg.ZkbMonitoredCharacterIDs;
+            ZkbMonitoredCorpIDsTxt.Text = cfg.ZkbMonitoredCorpIDs;
+            ZkbUseLocalTimeChk.IsChecked = cfg.ZkbUseLocalTime;
+            ZkbFontSizeSlider.Value = cfg.ZkbFontSize;
+            ZkbFontSizeLabel.Text = cfg.ZkbFontSize.ToString();
+
+            // Ensure Corp column exists in config (migration guard for running sessions)
+            if (!cfg.ZkbColumnOrder.Contains("Corp", StringComparison.OrdinalIgnoreCase))
+            {
+                cfg.ZkbColumnOrder = cfg.ZkbColumnOrder
+                    .Replace("AttackerAlliance", "__PROTECTED_ATTACKER__", StringComparison.OrdinalIgnoreCase)
+                    .Replace("Alliance,", "Alliance,Corp,", StringComparison.OrdinalIgnoreCase)
+                    .Replace("__PROTECTED_ATTACKER__", "AttackerAlliance");
+            }
+            if (!cfg.ZkbVisibleColumns.Contains("Corp", StringComparison.OrdinalIgnoreCase))
+                cfg.ZkbVisibleColumns += ",Corp";
+
+            // Load column visibility (from ZkbVisibleColumns)
+            var visible = cfg.ZkbVisibleColumns
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(c => c.Trim())
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            ZkbColTimeChk.IsChecked = visible.Contains("Time");
+            ZkbColRegionChk.IsChecked = visible.Contains("Region");
+            ZkbColSystemChk.IsChecked = visible.Contains("System");
+            ZkbColAllianceChk.IsChecked = visible.Contains("Alliance");
+            ZkbColCorpChk.IsChecked = visible.Contains("Corp");
+            ZkbColCharacterIDChk.IsChecked = visible.Contains("CharacterID");
+            ZkbColAttackerAllianceChk.IsChecked = visible.Contains("AttackerAlliance");
+            ZkbColShipTypeChk.IsChecked = visible.Contains("ShipType");
+            ZkbColValueChk.IsChecked = visible.Contains("Value");
+
+            // Reorder UI rows to match ZkbColumnOrder
+            ReorderColumnUI();
 
             _initializing = false;
 
@@ -270,6 +304,138 @@ namespace SMTAlert
         {
             if (_initializing) return;
             App.Config.ZkbCustomSystems = ZkbCustomSystemsTxt.Text;
+            App.Config.Save();
+        }
+
+        private void ZkbMonitoredCharIDs_Changed(object sender, TextChangedEventArgs e)
+        {
+            if (_initializing) return;
+            App.Config.ZkbMonitoredCharacterIDs = ZkbMonitoredCharIDsTxt.Text;
+            App.Config.Save();
+        }
+
+        private void ZkbMonitoredCorpIDs_Changed(object sender, TextChangedEventArgs e)
+        {
+            if (_initializing) return;
+            App.Config.ZkbMonitoredCorpIDs = ZkbMonitoredCorpIDsTxt.Text;
+            App.Config.Save();
+        }
+
+        private void ZkbColumn_Changed(object sender, RoutedEventArgs e)
+        {
+            if (_initializing) return;
+            SaveColumnConfig();
+        }
+
+        private void ZkbUseLocalTime_Changed(object sender, RoutedEventArgs e)
+        {
+            if (_initializing) return;
+            App.Config.ZkbUseLocalTime = ZkbUseLocalTimeChk.IsChecked == true;
+            App.Config.Save();
+        }
+
+        private void ZkbFontSize_Changed(object sender, RoutedEventArgs e)
+        {
+            if (_initializing) return;
+            int size = (int)ZkbFontSizeSlider.Value;
+            ZkbFontSizeLabel.Text = size.ToString();
+            App.Config.ZkbFontSize = size;
+            App.Config.Save();
+        }
+
+        private void ZkbColumn_MoveUp(object sender, RoutedEventArgs e)
+        {
+            if (_initializing) return;
+            string tag = (sender as Button)?.Tag as string;
+            if (string.IsNullOrEmpty(tag)) return;
+            MoveColumn(tag, -1);
+        }
+
+        private void ZkbColumn_MoveDown(object sender, RoutedEventArgs e)
+        {
+            if (_initializing) return;
+            string tag = (sender as Button)?.Tag as string;
+            if (string.IsNullOrEmpty(tag)) return;
+            MoveColumn(tag, 1);
+        }
+
+        private void MoveColumn(string columnName, int direction)
+        {
+            var order = App.Config.ZkbColumnOrder
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .ToList();
+
+            int idx = order.FindIndex(c => string.Equals(c, columnName, StringComparison.OrdinalIgnoreCase));
+            if (idx < 0) return;
+
+            int swapIdx = idx + direction;
+            if (swapIdx < 0 || swapIdx >= order.Count) return;
+
+            (order[idx], order[swapIdx]) = (order[swapIdx], order[idx]);
+            App.Config.ZkbColumnOrder = string.Join(",", order);
+
+            // Re-sync ZkbVisibleColumns in the new order
+            SaveColumnConfig();
+            ReorderColumnUI();
+        }
+
+        private void ReorderColumnUI()
+        {
+            var order = App.Config.ZkbColumnOrder
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            var rowMap = new Dictionary<string, System.Windows.FrameworkElement>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Time"] = ZkbColTimeChk.Parent as System.Windows.FrameworkElement,
+                ["Region"] = ZkbColRegionChk.Parent as System.Windows.FrameworkElement,
+                ["System"] = ZkbColSystemChk.Parent as System.Windows.FrameworkElement,
+                ["Alliance"] = ZkbColAllianceChk.Parent as System.Windows.FrameworkElement,
+                ["Corp"] = ZkbColCorpChk.Parent as System.Windows.FrameworkElement,
+                ["CharacterID"] = ZkbColCharacterIDChk.Parent as System.Windows.FrameworkElement,
+                ["AttackerAlliance"] = ZkbColAttackerAllianceChk.Parent as System.Windows.FrameworkElement,
+                ["ShipType"] = ZkbColShipTypeChk.Parent as System.Windows.FrameworkElement,
+                ["Value"] = ZkbColValueChk.Parent as System.Windows.FrameworkElement,
+            };
+
+            var container = ZkbColTimeChk.Parent is System.Windows.FrameworkElement parent ? parent.Parent as System.Windows.Controls.Panel : null;
+            if (container == null) return;
+
+            int insertIdx = 0;
+            foreach (var name in order)
+            {
+                if (rowMap.TryGetValue(name, out var row) && row != null)
+                {
+                    int curIdx = container.Children.IndexOf(row);
+                    if (curIdx != insertIdx)
+                    {
+                        container.Children.RemoveAt(curIdx);
+                        container.Children.Insert(insertIdx, row);
+                    }
+                    insertIdx++;
+                }
+            }
+        }
+
+        private void SaveColumnConfig()
+        {
+            var order = App.Config.ZkbColumnOrder
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            var visMap = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Time"] = ZkbColTimeChk.IsChecked == true,
+                ["Region"] = ZkbColRegionChk.IsChecked == true,
+                ["System"] = ZkbColSystemChk.IsChecked == true,
+                ["Alliance"] = ZkbColAllianceChk.IsChecked == true,
+                ["Corp"] = ZkbColCorpChk.IsChecked == true,
+                ["CharacterID"] = ZkbColCharacterIDChk.IsChecked == true,
+                ["AttackerAlliance"] = ZkbColAttackerAllianceChk.IsChecked == true,
+                ["ShipType"] = ZkbColShipTypeChk.IsChecked == true,
+                ["Value"] = ZkbColValueChk.IsChecked == true,
+            };
+
+            var visible = order.Where(c => visMap.ContainsKey(c) && visMap[c]).ToList();
+            App.Config.ZkbVisibleColumns = string.Join(",", visible);
             App.Config.Save();
         }
 

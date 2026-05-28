@@ -101,6 +101,48 @@ namespace SMTAlert
             set { _zkbCustomSystems = value ?? ""; OnPropertyChanged(nameof(ZkbCustomSystems)); }
         }
 
+        private string _zkbMonitoredCharacterIDs = "";
+        public string ZkbMonitoredCharacterIDs
+        {
+            get => _zkbMonitoredCharacterIDs;
+            set { _zkbMonitoredCharacterIDs = value ?? ""; OnPropertyChanged(nameof(ZkbMonitoredCharacterIDs)); }
+        }
+
+        private string _zkbMonitoredCorpIDs = "";
+        public string ZkbMonitoredCorpIDs
+        {
+            get => _zkbMonitoredCorpIDs;
+            set { _zkbMonitoredCorpIDs = value ?? ""; OnPropertyChanged(nameof(ZkbMonitoredCorpIDs)); }
+        }
+
+        private string _zkbVisibleColumns = "Time,System,Corp,Alliance,ShipType,Value,CharacterID,Region";
+        public string ZkbVisibleColumns
+        {
+            get => _zkbVisibleColumns;
+            set { _zkbVisibleColumns = value ?? "Time,System,Corp,Alliance,ShipType,Value,CharacterID,Region"; OnPropertyChanged(nameof(ZkbVisibleColumns)); }
+        }
+
+        private string _zkbColumnOrder = "Time,Region,System,Corp,Alliance,CharacterID,AttackerAlliance,ShipType,Value";
+        public string ZkbColumnOrder
+        {
+            get => _zkbColumnOrder;
+            set { _zkbColumnOrder = value ?? "Time,Region,System,Corp,Alliance,CharacterID,AttackerAlliance,ShipType,Value"; OnPropertyChanged(nameof(ZkbColumnOrder)); }
+        }
+
+        private bool _zkbUseLocalTime = false;
+        public bool ZkbUseLocalTime
+        {
+            get => _zkbUseLocalTime;
+            set { _zkbUseLocalTime = value; OnPropertyChanged(nameof(ZkbUseLocalTime)); }
+        }
+
+        private int _zkbFontSize = 10;
+        public int ZkbFontSize
+        {
+            get => _zkbFontSize;
+            set { _zkbFontSize = Math.Clamp(value, 8, 24); OnPropertyChanged(nameof(ZkbFontSize)); }
+        }
+
         // --- Always on top ---
         private bool _alwaysOnTop = true;
         public bool AlwaysOnTop
@@ -172,7 +214,34 @@ namespace SMTAlert
                 Directory.CreateDirectory(StorageRoot);
 
             var config = Serialization.DeserializeFromDisk<AlertConfig>(ConfigFile);
-            return config ?? new AlertConfig();
+            if (config == null)
+                return new AlertConfig();
+
+            // Migrate old configs: ensure Corp column is in order and visible lists
+            bool migrated = false;
+            if (!string.IsNullOrEmpty(config.ZkbColumnOrder) &&
+                !config.ZkbColumnOrder.Contains("Corp", StringComparison.OrdinalIgnoreCase))
+            {
+                // Protect AttackerAlliance before replacing Alliance
+                config.ZkbColumnOrder = config.ZkbColumnOrder
+                    .Replace("AttackerAlliance", "__PROTECTED_ATTACKER__", StringComparison.OrdinalIgnoreCase)
+                    .Replace("Alliance,", "Alliance,Corp,", StringComparison.OrdinalIgnoreCase)
+                    .Replace("__PROTECTED_ATTACKER__", "AttackerAlliance");
+                migrated = true;
+            }
+            if (!string.IsNullOrEmpty(config.ZkbVisibleColumns) &&
+                !config.ZkbVisibleColumns.Contains("Corp", StringComparison.OrdinalIgnoreCase))
+            {
+                config.ZkbVisibleColumns += ",Corp";
+                migrated = true;
+            }
+
+            if (migrated)
+            {
+                try { config.Save(); } catch { /* Migration save is best-effort; will retry on next startup */ }
+            }
+
+            return config;
         }
 
         public void Save()

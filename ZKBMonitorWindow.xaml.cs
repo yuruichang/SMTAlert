@@ -34,8 +34,17 @@ namespace SMTAlert
             // Apply header opacity
             ApplyHeaderOpacity(App.Config.ZkbContentOpacity);
 
-            // Load persisted column widths
-            Dispatcher.BeginInvoke(new Action(() => LoadColumnWidths()));
+            // Apply column layout (order + visibility)
+            ApplyColumnLayout();
+
+            // Apply font size
+            ApplyFontSize();
+
+            // Set time display mode
+            SMT.EVEData.ZKillRedisQ.ZKBDataSimple.DisplayLocalTime = App.Config.ZkbUseLocalTime;
+
+            // Initial column width adjustment (deferred for proper layout)
+            Dispatcher.BeginInvoke(new Action(() => AdjustColumnWidths()));
 
             App.ZKillFeed.KillsAddedEvent += OnKillsAdded;
             App.Config.PropertyChanged += OnConfigChanged;
@@ -65,7 +74,6 @@ namespace SMTAlert
         private void ZKBMonitor_Closing(object sender, CancelEventArgs e)
         {
             StoreWindowPosition();
-            StoreColumnWidths();
             App.ZKillFeed.KillsAddedEvent -= OnKillsAdded;
             App.Config.PropertyChanged -= OnConfigChanged;
         }
@@ -141,6 +149,28 @@ namespace SMTAlert
             }
         }
 
+        private void ZKBKillList_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var hit = VisualTreeHelper.HitTest(ZKBKillList, e.GetPosition(ZKBKillList));
+            if (hit?.VisualHit != null)
+            {
+                var row = FindVisualParent<DataGridRow>(hit.VisualHit);
+                if (row != null)
+                    row.IsSelected = true;
+            }
+        }
+
+        private void ZKBKillList_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            var hit = VisualTreeHelper.HitTest(ZKBKillList, Mouse.GetPosition(ZKBKillList));
+            if (hit?.VisualHit != null)
+            {
+                var row = FindVisualParent<DataGridRow>(hit.VisualHit);
+                if (row == null)
+                    e.Handled = true;
+            }
+        }
+
         private static IEnumerable<T> FindVisualChildren<T>(DependencyObject parent) where T : DependencyObject
         {
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
@@ -164,42 +194,6 @@ namespace SMTAlert
             return null;
         }
 
-        private void LoadColumnWidths()
-        {
-            try
-            {
-                string saved = Properties.Settings.Default.ZKB_ColumnWidths;
-                if (string.IsNullOrEmpty(saved)) return;
-                var parts = saved.Split('|');
-                var columns = ZKBKillList.Columns;
-                for (int i = 0; i < parts.Length && i < columns.Count; i++)
-                {
-                    if (double.TryParse(parts[i], out double w) && w > 0)
-                    {
-                        columns[i].Width = new DataGridLength(w, DataGridLengthUnitType.Pixel);
-                        if (i == 1 || i == 2 || i == 3) // System, Alliance, ShipType are star-sized
-                            columns[i].Width = new DataGridLength(w, DataGridLengthUnitType.Star);
-                    }
-                }
-            }
-            catch { }
-        }
-
-        private void StoreColumnWidths()
-        {
-            try
-            {
-                var widths = new List<string>();
-                foreach (var col in ZKBKillList.Columns)
-                {
-                    widths.Add(col.ActualWidth.ToString("F0"));
-                }
-                Properties.Settings.Default.ZKB_ColumnWidths = string.Join("|", widths);
-                Properties.Settings.Default.Save();
-            }
-            catch { }
-        }
-
         private void ApplyHeaderOpacity(double opacity)
         {
             foreach (var header in FindVisualChildren<DataGridColumnHeader>(ZKBKillList))
@@ -208,18 +202,157 @@ namespace SMTAlert
             }
         }
 
+        private void ApplyFontSize()
+        {
+            double size = App.Config.ZkbFontSize;
+
+            // Apply to rows via the row style
+            ZKBKillList.Resources.Remove(typeof(DataGridRow));
+            var rowStyle = new Style(typeof(DataGridRow), TryFindResource(typeof(DataGridRow)) as Style);
+            rowStyle.Setters.Add(new Setter(TextBlock.FontSizeProperty, size));
+            ZKBKillList.Resources.Add(typeof(DataGridRow), rowStyle);
+
+            // Apply to column headers via the header style
+            foreach (var header in FindVisualChildren<DataGridColumnHeader>(ZKBKillList))
+            {
+                header.FontSize = size;
+            }
+        }
+
+        private void ApplyColumnLayout()
+        {
+            var colMap = new Dictionary<string, DataGridColumn>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Time"] = ColTime,
+                ["Region"] = ColRegion,
+                ["System"] = ColSystem,
+                ["Alliance"] = ColAlliance,
+                ["Corp"] = ColCorp,
+                ["CharacterID"] = ColCharacterID,
+                ["AttackerAlliance"] = ColAttackerAlliance,
+                ["ShipType"] = ColShipType,
+                ["Value"] = ColValue,
+            };
+
+            var visible = App.Config.ZkbVisibleColumns
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(c => c.Trim())
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            var order = App.Config.ZkbColumnOrder
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            ZKBKillList.Columns.Clear();
+            foreach (var name in order)
+            {
+                if (colMap.TryGetValue(name, out var col))
+                {
+                    col.Visibility = visible.Contains(name) ? Visibility.Visible : Visibility.Collapsed;
+                    ZKBKillList.Columns.Add(col);
+                }
+            }
+        }
+
         private void OnKillsAdded()
         {
             Dispatcher.Invoke(() =>
             {
                 CollectionViewSource.GetDefaultView(ZKBKillList.ItemsSource)?.Refresh();
+                AdjustColumnWidths();
             });
+        }
+
+        private void AdjustColumnWidths()
+        {
+            ZKBKillList.UpdateLayout();
+
+            // Measure with Auto to get content-based widths
+            foreach (var col in ZKBKillList.Columns)
+            {
+                if (col.Visibility == Visibility.Visible)
+                    col.Width = new DataGridLength(1, DataGridLengthUnitType.Auto);
+            }
+            ZKBKillList.UpdateLayout();
+
+            double totalContentWidth = 0;
+            int visibleCount = 0;
+            foreach (var col in ZKBKillList.Columns)
+            {
+                if (col.Visibility == Visibility.Visible)
+                {
+                    totalContentWidth += col.ActualWidth;
+                    visibleCount++;
+                }
+            }
+
+            double availableWidth = ZKBKillList.ActualWidth - 5;
+            if (totalContentWidth < availableWidth && availableWidth > 0 && visibleCount > 0)
+            {
+                // Content fits in window — proportionally fill using Star coefficients
+                foreach (var col in ZKBKillList.Columns)
+                {
+                    if (col.Visibility == Visibility.Visible)
+                    {
+                        double ratio = col.ActualWidth / totalContentWidth;
+                        col.Width = new DataGridLength(ratio, DataGridLengthUnitType.Star);
+                    }
+                }
+            }
+            // else: content wider than window — keep Auto, scrollbar handles overflow
         }
 
         private bool ZKillFilter(object item)
         {
             var zs = item as SMT.EVEData.ZKillRedisQ.ZKBDataSimple;
             if (zs == null) return false;
+
+            // Check monitored character IDs/names (bypasses system/region filter)
+            if (!string.IsNullOrWhiteSpace(App.Config.ZkbMonitoredCharacterIDs))
+            {
+                var charEntries = App.Config.ZkbMonitoredCharacterIDs
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                foreach (var entry in charEntries)
+                {
+                    if (int.TryParse(entry, out int cid))
+                    {
+                        if (cid == zs.VictimCharacterID)
+                            return true;
+                    }
+                    else
+                    {
+                        // Name-based reverse lookup
+                        foreach (var kvp in EveManager.Instance.CharacterIDToName)
+                        {
+                            if (string.Equals(kvp.Value, entry, StringComparison.OrdinalIgnoreCase) && kvp.Key == zs.VictimCharacterID)
+                                return true;
+                        }
+                    }
+                }
+            }
+
+            // Check monitored corp IDs/names (bypasses system/region filter)
+            if (!string.IsNullOrWhiteSpace(App.Config.ZkbMonitoredCorpIDs))
+            {
+                var corpEntries = App.Config.ZkbMonitoredCorpIDs
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                foreach (var entry in corpEntries)
+                {
+                    if (int.TryParse(entry, out int cid))
+                    {
+                        if (cid == zs.VictimCorpID)
+                            return true;
+                    }
+                    else
+                    {
+                        // Name-based reverse lookup
+                        foreach (var kvp in EveManager.Instance.CorporationIDToName)
+                        {
+                            if (string.Equals(kvp.Value, entry, StringComparison.OrdinalIgnoreCase) && kvp.Key == zs.VictimCorpID)
+                                return true;
+                        }
+                    }
+                }
+            }
 
             var c = App.ActiveCharacter;
             bool filterByRegion = App.Config.ZkbFilterByWarningRegion;
@@ -299,7 +432,18 @@ namespace SMTAlert
                         _maxKills = App.Config.ZkbMaxKills; break;
                     case nameof(AlertConfig.ZkbFilterByWarningRegion):
                     case nameof(AlertConfig.ZkbCustomSystems):
+                    case nameof(AlertConfig.ZkbMonitoredCharacterIDs):
+                    case nameof(AlertConfig.ZkbMonitoredCorpIDs):
                         CollectionViewSource.GetDefaultView(ZKBKillList.ItemsSource)?.Refresh(); break;
+                    case nameof(AlertConfig.ZkbUseLocalTime):
+                        SMT.EVEData.ZKillRedisQ.ZKBDataSimple.DisplayLocalTime = App.Config.ZkbUseLocalTime;
+                        OnKillsAdded(); break;
+                    case nameof(AlertConfig.ZkbVisibleColumns):
+                    case nameof(AlertConfig.ZkbColumnOrder):
+                        ApplyColumnLayout(); break;
+                    case nameof(AlertConfig.ZkbFontSize):
+                        ApplyFontSize();
+                        AdjustColumnWidths(); break;
                 }
             });
         }

@@ -39,9 +39,13 @@
     <s:String x:Key="ZKB_Title">ZKB 监控</s:String>
     <s:String x:Key="ZKB_Column_Time">时间</s:String>
     <s:String x:Key="ZKB_Column_System">星系</s:String>
+    <s:String x:Key="ZKB_Column_CharacterID">角色</s:String>
+    <s:String x:Key="ZKB_Column_Region">星域</s:String>
     <s:String x:Key="ZKB_Column_Alliance">联盟</s:String>
+    <s:String x:Key="ZKB_Column_Corp">公司</s:String>
     <s:String x:Key="ZKB_Column_ShipType">舰船类型</s:String>
     <s:String x:Key="ZKB_Column_Value">价值</s:String>
+    <s:String x:Key="ZKB_Column_AttackerAlliance">击杀者联盟</s:String>
     <s:String x:Key="ZKB_CtxShowSys">显示星系详情</s:String>
     <s:String x:Key="ZKB_CtxOpen">在ZKB上打开击杀</s:String>
     <s:String x:Key="ZKB_CtxCopyLink">复制游戏内链接</s:String>
@@ -60,8 +64,8 @@
     <s:String x:Key="Settings_Alert_Channel">警报频道名称</s:String>
     <s:String x:Key="Settings_Alert_ClearKeywords">清除警报关键词</s:String>
     <s:String x:Key="Settings_Alert_ClearKeywordsTip">多个关键词用逗号分隔，例如: clear, safe, green</s:String>
-    <s:String x:Key="Settings_Alert_FreshMin">警报活跃时间（分钟）</s:String>
-    <s:String x:Key="Settings_Alert_StaleMin">警报可见时间（分钟）</s:String>
+    <s:String x:Key="Settings_Alert_FreshMin">警报活跃时间（分）</s:String>
+    <s:String x:Key="Settings_Alert_StaleMin">警报可见时间（分）</s:String>
     <s:String x:Key="Settings_Ovl_BgOpacity">背景不透明度</s:String>
     <s:String x:Key="Settings_Ovl_ContentOpacity">内容不透明度</s:String>
     <s:String x:Key="Settings_Ovl_GathererMode">防御模式</s:String>
@@ -70,10 +74,18 @@
     <s:String x:Key="Settings_ZKB_BgOpacity">背景不透明度</s:String>
     <s:String x:Key="Settings_ZKB_ContentOpacity">内容不透明度</s:String>
     <s:String x:Key="Settings_ZKB_MaxKills">最大击杀显示数</s:String>
-    <s:String x:Key="Settings_ZKB_ExpireMin">击杀过期时间（分钟）</s:String>
+    <s:String x:Key="Settings_ZKB_ExpireMin">击杀过期时间（分）</s:String>
     <s:String x:Key="Settings_ZKB_FilterRegion">按警告区域过滤</s:String>
     <s:String x:Key="Settings_ZKB_CustomSystems">监控星系/星域</s:String>
     <s:String x:Key="Settings_ZKB_CustomSystemsTip">多个名称用逗号分隔。支持中英文，例如: The Forge, Lonetrek, Jita</s:String>
+    <s:String x:Key="Settings_ZKB_MonitoredChars">角色/公司监控</s:String>
+    <s:String x:Key="Settings_ZKB_MonitoredCharIDs">监控角色ID</s:String>
+    <s:String x:Key="Settings_ZKB_MonitoredCharIDsTip">多个角色ID用逗号分隔，不受星系过滤限制</s:String>
+    <s:String x:Key="Settings_ZKB_MonitoredCorpIDs">监控公司ID</s:String>
+    <s:String x:Key="Settings_ZKB_MonitoredCorpIDsTip">多个公司ID用逗号分隔，不受星系过滤限制</s:String>
+    <s:String x:Key="Settings_ZKB_Columns">显示列（↑↓调整顺序）</s:String>
+    <s:String x:Key="Settings_ZKB_FontSize">字体大小</s:String>
+    <s:String x:Key="Settings_ZKB_UseLocalTime">使用本地时间显示（否则使用游戏时间UTC+0）</s:String>
 
     <!-- Character Alert Settings -->
     <s:String x:Key="Char_AlertRange">警报范围（跳）</s:String>

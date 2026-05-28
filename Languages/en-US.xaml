@@ -39,9 +39,13 @@
     <s:String x:Key="ZKB_Title">ZKB Monitor</s:String>
     <s:String x:Key="ZKB_Column_Time">Time</s:String>
     <s:String x:Key="ZKB_Column_System">System</s:String>
+    <s:String x:Key="ZKB_Column_CharacterID">Character</s:String>
+    <s:String x:Key="ZKB_Column_Region">Region</s:String>
     <s:String x:Key="ZKB_Column_Alliance">Alliance</s:String>
+    <s:String x:Key="ZKB_Column_Corp">Corp</s:String>
     <s:String x:Key="ZKB_Column_ShipType">Ship Type</s:String>
     <s:String x:Key="ZKB_Column_Value">Value</s:String>
+    <s:String x:Key="ZKB_Column_AttackerAlliance">Attacker</s:String>
     <s:String x:Key="ZKB_CtxShowSys">Show System Details</s:String>
     <s:String x:Key="ZKB_CtxOpen">Open Kill on ZKB</s:String>
     <s:String x:Key="ZKB_CtxCopyLink">Copy In-Game Link</s:String>
@@ -74,6 +78,14 @@
     <s:String x:Key="Settings_ZKB_FilterRegion">Filter by Warning Region</s:String>
     <s:String x:Key="Settings_ZKB_CustomSystems">Monitor Systems/Regions</s:String>
     <s:String x:Key="Settings_ZKB_CustomSystemsTip">Multiple names separated by commas. Supports Chinese and English, e.g.: The Forge, Lonetrek, Jita</s:String>
+    <s:String x:Key="Settings_ZKB_MonitoredChars">Character/Corp Monitoring</s:String>
+    <s:String x:Key="Settings_ZKB_MonitoredCharIDs">Monitored Character IDs</s:String>
+    <s:String x:Key="Settings_ZKB_MonitoredCharIDsTip">Comma-separated character IDs, bypass system filter</s:String>
+    <s:String x:Key="Settings_ZKB_MonitoredCorpIDs">Monitored Corp IDs</s:String>
+    <s:String x:Key="Settings_ZKB_MonitoredCorpIDsTip">Comma-separated corporation IDs, bypass system filter</s:String>
+    <s:String x:Key="Settings_ZKB_Columns">Columns (↑↓ reorder)</s:String>
+    <s:String x:Key="Settings_ZKB_FontSize">Font Size</s:String>
+    <s:String x:Key="Settings_ZKB_UseLocalTime">Use local time (otherwise game time UTC+0)</s:String>
 
     <!-- Character Alert Settings -->
     <s:String x:Key="Char_AlertRange">Alert Range (jumps)</s:String>
