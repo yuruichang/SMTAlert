@@ -17,21 +17,21 @@
 | 依赖 | 说明 |
 |------|------|
 | .NET 8.0 SDK | 编译框架 |
-| `EVEData` 项目 | SMT 主项目的数据层，包含星系地图、BFS 导航、ZKB 引擎、ESI 工具类 |
+| `EVEData` 项目 | 数据层，包含星系地图、BFS 导航、ZKB 引擎、ESI 工具类（见下方仓库） |
 | NAudio 2.2.1 | 报警音播放 |
 | Newtonsoft.Json 13.0.4 | JSON 序列化 |
 | System.Configuration.ConfigurationManager 8.0.0 | 配置文件管理 |
 
 ### 编译步骤
 
-1. 克隆主项目：
+1. 克隆 EVEData 数据层仓库：
    ```
-   git clone https://github.com/Slazanger/SMT.git
+   git clone https://github.com/yuruichang/SMT-EVEData.git
    ```
 
-2. 将本仓库克隆到 SMT 目录的 `SMTAlert` 子目录：
+2. 将本仓库克隆到 EVEData 目录的 `SMTAlert` 子目录：
    ```
-   cd SMT
+   cd SMT-EVEData
    git clone https://github.com/yuruichang/SMTAlert.git SMTAlert
    ```
 
@@ -42,7 +42,12 @@
 
 4. 编译输出在 `SMTAlert/bin/x64/Release/`，直接运行 `SMTAlert.exe`
 
-**注意：** 本项目依赖 EVEData 项目（`..\EVEData\EVEData.csproj`），必须放在 SMT 主项目的同级目录下才能编译。
+**注意：** 本项目依赖 EVEData 项目（`..\EVEData\EVEData.csproj`），目录结构必须为：
+```
+SMT-EVEData/
+├── EVEData/          # 数据层项目
+└── SMTAlert/         # 本仓库
+```
 
 ## 使用说明
 
@@ -54,7 +59,11 @@
 
 ## 更新日志
 
-### v2.1
+### v2.2
+- **ZKB 行间距优化** — 每条KB信息增加2px间距和分割线
+- **ZKB 文字颜色修复** — 浅蓝声望行文字改为黑色，提高可读性
+- **ZKB 击杀者联盟换行** — 超过3个联盟时自动换行显示，防止行宽撑爆
+- **编译流程简化** — EVEData 独立为公开仓库，不再依赖完整 SMT 主项目
 - **新增 ZKB 公司列** — 显示受害者公司缩写，支持列排序与可见性切换
 - **ZKB 行选中优化** — 点击行内任意位置选中整行，选中高亮覆盖全行，右键空白不弹出菜单
 - **ZKB 字体大小设置** — 设置中可动态调整字号，行高自动适配
