@@ -82,6 +82,11 @@ namespace SMTAlert
                         // Dark backgrounds (red/orange) need light text even with gold tint
                         rowCol = highValue ? Color.FromRgb(255, 255, 200) : Colors.Black;
                     }
+                    else if (standing == 5.0f)
+                    {
+                        // Light blue background → black text for readability
+                        rowCol = Colors.Black;
+                    }
                     else if (highValue)
                     {
                         // Gold text for high-value rows on dark/blue backgrounds
